@@ -18,7 +18,9 @@
               <!-- {{ a }} -->
               <div class="input-group">
                 <!-- I enchange ni ang design kong mahimo  -->
-                <input type="checkbox" @change="selectedIdForAddress(a.address_id)" v-model="isChecked" :value="a.address_id"> {{ 1+index++ }}. {{ a.deliveryAddress }}, {{ a.streetNumber }}, {{ a.landmark }}
+                <input type="checkbox" @change="selectedIdForAddress(a.address_id)" v-model="isChecked"
+                  :value="a.address_id"> {{ 1 + index++ }}. {{ a.deliveryAddress }}, {{ a.streetNumber }}, {{ a.landmark
+                }}
               </div>
             </div>
           </div>
@@ -27,13 +29,15 @@
 
       <q-card v-for="item in cartItems" :key="item.cart_id" flat bordered class="order-summary q-mt-md">
         <q-card-section horizontal>
-          <q-img :src="`http://localhost/raj-express/backend/uploads/${item.product_image}`" style="width: 100px; height: 100px; object-fit: cover;" />
+          <q-img :src="`http://localhost/raj-express/backend/uploads/${item.product_image}`"
+            style="width: 100px; height: 100px; object-fit: cover;" />
           <q-card-section>
             <div class="text-subtitle1">{{ item.product_name }} <small>x</small>{{ item.quantity }}</div>
 
-            <div class="text-h6">₱ {{ parseInt( item.product_price ) }}</div>
-            <div class="">Adds On {{ parseInt( item.addOns ) }}</div>
-            <div class="">Total Amount: {{ parseInt( item.addOns ) + parseInt(item.product_price * item.quantity) }}</div>
+            <div class="text-h6">₱ {{ parseInt(item.product_price) }}</div>
+            <div class="">Adds On {{ parseInt(item.addOns) }}</div>
+            <div class="">Total Amount: {{ parseInt(item.addOns) + parseInt(item.product_price * item.quantity) }}
+            </div>
           </q-card-section>
         </q-card-section>
       </q-card>
@@ -47,7 +51,7 @@
         <div class="text-subtitle1 q-mb-sm">Payment Details:</div>
         <div v-for="item in cartItems" :key="item.id" class="row justify-between">
           <span>₱</span>
-          <span>{{ parseInt( item.addOns ) + parseInt(item.product_price * item.quantity) }}</span>
+          <span>{{ parseInt(item.addOns) + parseInt(item.product_price * item.quantity) }}</span>
         </div>
       </div>
 
@@ -70,22 +74,22 @@ import { useRouter } from 'vue-router'
 import axios from 'axios'
 
 export default {
-  data(){
-    return{
+  data() {
+    return {
       address: '',
       paymentMethod: 'cash',
-      paymentOptions: [ { label: 'Cash on Delivery', value: 'cash' }, { label: 'G-Cash', value: 'gcash' }],
+      paymentOptions: [{ label: 'Cash on Delivery', value: 'cash' }, { label: 'G-Cash', value: 'gcash' }],
       cartItems: [],
       addresses: [],
       selectedAddress: 0,
       isChecked: false,
     }
   },
-  methods:{
-    goBack(){
-      this.$router.back(); 
+  methods: {
+    goBack() {
+      this.$router.back();
     },
-    selectedIdForAddress(id){
+    selectedIdForAddress(id) {
       this.selectedAddress = id;
     },
     async fetchCartItems() {
@@ -98,17 +102,17 @@ export default {
         });
         const data = response.data;
 
-        this.cartItems = data.cartItems; 
+        this.cartItems = data.cartItems;
       } catch (error) {
         console.error('Error fetching cart items:', error);
       }
       // { "cart_id": 2, "product_id": 30, "user_id": 12, "quantity": 1, "status": "pending", "created_at": "2024-10-28 14:09:01", "updated_at": "2024-10-28 14:09:01", "fullname": "123 123", "contact_number": "123", "email": "123@1", "product_name": "Pancit", "product_price": "30.00", "product_image": "6719bf8359381_pancit-bihon-10.jpg" }
     },
-    async fetchAddresses(){
+    async fetchAddresses() {
       try {
         const token = localStorage.getItem('token');
-        
-        const response = await axios.get('http://localhost/raj-express/backend/controller/addressController/getAllAddress.php',{
+
+        const response = await axios.get('http://localhost/raj-express/backend/controller/addressController/getAllAddress.php', {
           headers: {
             'Authorization': token
           }
@@ -121,33 +125,60 @@ export default {
         console.error('Error fetching addresses:', error)
       }
     },
-    placeOrder(){
+    async placeOrder() {
       try {
-        if(this.selectedAddress != 0){
+        if (this.selectedAddress != 0) {
           const token = localStorage.getItem('token');
           let orderData = [];
-          let orderLengths = this.cartItems.length;
 
-          for (let i = 0; i < orderLengths; i++) {
+          this.cartItems.forEach(item => {
             orderData.push({
               user_id: token,
-              product_id: this.cartItems[i].product_id,
+              product_id: item.product_id,
               address_id: this.selectedAddress,
-              order_qty: this.cartItems[i].quantity,
-              extra: this.cartItems[i].addOnsData,
+              order_qty: item.quantity,
+              extra: item.addOnsData,
+              payment_method: this.paymentMethod,
+              payment_total: parseInt(item.addOns) + parseInt(item.product_price * item.quantity),
+              payment_status: this.paymentMethod === 'cash' ? 'pending' : 'pending on gcash',
             });
+          });
+
+          const response = await fetch("http://localhost/raj-express/backend/controller/orderController/add.php", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ orders: orderData })
+          });
+
+          if (!response.ok) {
+            const errorMessage = await response.text();
+            throw new Error(`HTTP error! status: ${response.status}, message: ${errorMessage}`);
           }
 
-          console.log(orderData);
-        }else{
+          const result = await response.json();
+
+          if (result && result.success) {
+            alert('Order Created!');
+            // $q.notify({
+            //   color: 'positive',
+            //   message: result.success,
+            // });
+          } else {
+            throw new Error(result.error || "Failed to add product to cart");
+          }
+
+        } else {
           console.log('No Selected Address.');
         }
-        
+
       } catch (error) {
-        console.log('Error in ' . error);
+        console.log('Error in ' + error.message);
       }
+
     },
-    addAddress(){
+    addAddress() {
       this.$router.push('/address');
     }
   },
@@ -156,22 +187,17 @@ export default {
       return this.cartItems.reduce((total, item) => {
         const productTotal = parseInt(item.product_price) * parseInt(item.quantity);
 
-        const addOnsTotal = parseInt(item.addOns) || 0; 
+        const addOnsTotal = parseInt(item.addOns) || 0;
 
         return total + productTotal + addOnsTotal;
       }, 0);
     },
-    
-    getAllProductIds(){
-      
-    },
-
   },
-  created(){
+  created() {
     this.fetchAddresses();
     this.fetchCartItems();
   }
-  
+
 }
 </script>
 

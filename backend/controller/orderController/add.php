@@ -14,31 +14,47 @@ $data = json_decode($input, true);
 include "../../connection/dbconfig.php"; 
 
 function sendJsonResponse($data, $statusCode = 200) {
+    header('Content-Type: application/json');
     http_response_code($statusCode);
-    header("Content-Type: application/json");
-    
-    $json = json_encode($data);
-    
-    if ($json === false) {
-        http_response_code(500);
-        echo json_encode(["error" => "Failed to encode JSON"]);
-    } else {
-        echo $json;
-    }
-    exit;
+    echo json_encode($data);
+    exit();
 }
 
 try {
-    $database = new Database();
-    $db = $database->getDb();
 
-    $order = "INSERT INTO `orders`(`user_id`, `product_id`, `address_id`, `payment_id`, `order_qty`, `extra`, `status`) VALUES (:user_id, :product_id, :address_id, :payment_id, :order_qty, :extra, :status)";
-    $cartStmt = $db->prepare($order);
-    // $cartStmt->bindParam(":status", $pendingStatus);
-    $cartStmt->execute();
-
+    if (!empty($data['orders'])) {
+        $database = new Database();
+        $db = $database->getDb();
     
+        foreach ($data['orders'] as $order) {
+            $payment = "INSERT INTO `payments`(`user_id`, `payment_method`, `payment_total`, `payment_status`) VALUES (:user_id, :payment_method, :payment_total, :payment_status)";
+            $paymentStmt = $db->prepare($payment);
+            $paymentStmt->bindParam(":user_id", $order['user_id']);
+            $paymentStmt->bindParam(":payment_method", $order['payment_method']);
+            $paymentStmt->bindParam(":payment_total", $order['payment_total']);
+            $paymentStmt->bindParam(":payment_status", $order['payment_status']);
+            $paymentStmt->execute();
+            $paymentId = $db->lastInsertId();
+    
+            if ($paymentId) {
+                $orderQuery = "INSERT INTO `orders`(`user_id`, `product_id`, `address_id`, `payment_id`, `order_qty`, `extra`) VALUES (:user_id, :product_id, :address_id, :payment_id, :order_qty, :extra)";
+                $orderStmt = $db->prepare($orderQuery);
+                $orderStmt->bindParam(":user_id", $order['user_id']);
+                $orderStmt->bindParam(":product_id", $order['product_id']);
+                $orderStmt->bindParam(":address_id", $order['address_id']);
+                $orderStmt->bindParam(":payment_id", $paymentId);
+                $orderStmt->bindParam(":order_qty", $order['order_qty']);
+                $orderStmt->bindParam(":extra", $order['extra']);
+                $orderStmt->execute();
+            } else {
+                sendJsonResponse(["error" => "Failed to create payment record."], 500);
+            }
+        }
+        sendJsonResponse(["success" => "All orders processed successfully."], 200);
+    } else {
+        sendJsonResponse(["error" => "No orders found."], 400);
+    }
 
-} catch (PDOException $e) {
-    sendJsonResponse(["error" => "Database error: " . $e->getMessage()], 500);
+} catch (Exception $e) {
+    sendJsonResponse(["error" => "Error: " . $e->getMessage()], 500);
 }

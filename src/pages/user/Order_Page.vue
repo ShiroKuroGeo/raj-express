@@ -85,7 +85,6 @@
     },
     methods: {
       async fetchOrders() {
-        // Fetch ongoing and history orders from backend
         try {
           const response = await fetch('http://localhost/raj-express/backend/controller/getOrders.php');
           const data = await response.json();
