@@ -39,12 +39,14 @@
               <q-item-section>My Order</q-item-section>
             </q-item>
 
-            <q-item clickable v-ripple @click="goToOrderDetails">
+            <!-- Sa order rani siya ayaw ibutang ang mga details2 -->
+             
+            <!-- <q-item clickable v-ripple @click="goToOrderDetails">
               <q-item-section avatar>
                 <q-icon name="receipt_long" />
               </q-item-section>
               <q-item-section>Order Details</q-item-section>
-            </q-item>
+            </q-item> -->
 
             <q-item clickable v-ripple @click="goToNotifications">
               <q-item-section avatar>
