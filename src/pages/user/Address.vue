@@ -144,24 +144,40 @@ export default {
       }
     },
     markMap (){
-      const cebuCoordinates = { lat: 10.2833322, lng: 123.983329 };
-      this.map = L.map("map").setView(cebuCoordinates, 13);
-  
+      const basakCoordinates = { lat: 10.3070, lng: 123.9470 };
+      const basakBounds = L.latLngBounds([
+        [10.2500, 123.9500],
+        [10.3500, 124.0500] 
+      ]);
+
+      this.map = L.map("map", {
+        center: basakCoordinates,
+        zoom: 15,
+        maxBounds: basakBounds,
+        maxBoundsViscosity: 1.0,
+        minZoom: 14,
+        maxZoom: 17,
+      });
+
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 18,
         attribution: '© OpenStreetMap contributors'
       }).addTo(this.map);
-  
+
       this.map.on('click', (e) => {
         const { lat, lng } = e.latlng;
+
         this.latitude = lat;
         this.longitude = lng; 
-  
-        if (this.marker) {
-          this.map.removeLayer(this.marker);
-        }
 
-        this.marker = L.marker([lat, lng]).addTo(this.map);
+        if (basakBounds.contains([lat, lng])) {
+          if (this.marker) {
+            this.map.removeLayer(this.marker);
+          }
+
+          this.marker = L.marker([lat, lng]).addTo(this.map);
+        } else {
+          alert("You can only interact within Basak, Lapu-Lapu area.");
+        }
       });
     }
   },
@@ -169,39 +185,6 @@ export default {
     this.markMap();
     this.checkIfThereIsAlreadyAnAddress();
   },
-  // components: {
-  //   CebuMap
-  // },
-  // setup () {
-  //   const personName = ref('')
-  //   const phoneNumber = ref('')
-  //   const deliveryAddress = ref('')
-  //   const streetNumber = ref('')
-
-  //   const submitDeliveryInfo = async () => {
-  //     try {
-  //       const response = await api.post('/add-delivery-info', {
-  //         personName: personName.value,
-  //         phoneNumber: phoneNumber.value,
-  //         deliveryAddress: deliveryAddress.value,
-  //         streetNumber: streetNumber.value
-  //       })
-  //       // Handle success
-  //       console.log(response.data)
-  //     } catch (error) {
-  //       // Handle error
-  //       console.error(error)
-  //     }
-  //   }
-
-  //   return {
-  //     personName,
-  //     phoneNumber,
-  //     deliveryAddress,
-  //     streetNumber,
-  //     submitDeliveryInfo
-  //   }
-  // }
 }
 </script>
 
