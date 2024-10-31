@@ -12,8 +12,9 @@
         <div class="profile-card bg-white q-ma-sm q-pa-md rounded-borders">
           <div class="profile-picture-container q-mb-md">
             <q-avatar size="100px" class="bg-grey-3">
-              <img :src="profilePicture">
-              <q-btn round color="red" icon="edit" size="sm" class="edit-icon" @click="uploadImage" />
+              <img :src="profilePicture ? `http://localhost/raj-express/backend/uploads/${profilePicture}` : `http://localhost/raj-express/backend/uploads/profile.jpg`">
+              <q-btn round color="red" icon="edit" size="sm" class="edit-icon" @click="addImage" />
+              <input type="file" id="file-input" @change="profileImage" name="file-input" class="hidden">
             </q-avatar>
           </div>
 
@@ -70,7 +71,8 @@
             </template>
           </q-input>
 
-          <q-btn label="Update" color="red" class="full-width q-mt-md" @click="signup" />
+          <q-btn label="Update" color="red" class="full-width q-mt-md" @click="updateProfile" />
+
         </div>
       </q-page>
     </q-page-container>
@@ -88,9 +90,12 @@ export default{
     return{
       showPassword: false,
       first_name: '',
+      profilePicture: '',
       last_name: '',
       email: '',
       contact_number: '',
+      password: '',
+      confirmpassword: '',
     }
   },
   methods:{
@@ -103,14 +108,14 @@ export default{
           }
         });
 
-        console.log(response.data);
         this.first_name = response.data.fn;
         this.last_name = response.data.ln;
         this.email = response.data.mail;
         this.contact_number = response.data.number;
+        this.profilePicture = response.data.profilePicture;
 
       } catch (error) {
-        console.log('Error in ' . error);
+        console.log('Error in ' + error);
       }
     },
     togglePasswordVisibility(){
@@ -119,154 +124,93 @@ export default{
     goToMenu(){
       this.$router.push("/menu"); 
     },
+    addImage(){
+      document.getElementById("file-input").click();
+    },
+    async profileImage(e){
+      try {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('profile_picture', file);
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+          console.error('No token found');
+          return;
+        }
+
+        const response = await axios.post('http://localhost/raj-express/backend/controller/userController/uploadProfile.php', formData, {
+          headers: {
+            'Authorization': token,
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+
+        if(response.status == 200){
+          alert('Success');
+          this.getAllUserInformation();
+        }else{
+          alert('Unsuccessful Update!');
+        }
+
+      } catch (error) {
+        console.error('Upload error:', error.response ? error.response.data : error.message);
+      }
+
+    },
+    async updateProfile (){
+      try {
+
+          const token = localStorage.getItem('token');
+  
+          const data = {
+            firstName: this.first_name,
+            lastName: this.last_name,
+            email: this.email,
+            number: this.contact_number,
+            password: this.password == '' ? null : this.password,
+            user_id: token
+          };
+          
+          const response = await fetch("http://localhost/raj-express/backend/controller/userController/changeInformation.php", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data)
+          });
+
+          if (!response.ok) {
+            const errorMessage = await response.text();
+            throw new Error(`HTTP error! status: ${response.status}, message: ${errorMessage}`);
+          }
+
+          const result = await response.json();
+          console.log(result);
+
+          if (result) {
+            alert('Updated information!');
+            // $q.notify({
+            //   color: 'positive',
+            //   message: result.success
+            // })
+          } else {
+            throw new Error(result.error || "Failed to add product to cart");
+          }
+
+      } catch (error) {
+        console.log('Error in ' + error);
+      }
+    }
   },
   created(){
     this.getAllUserInformation();
+    this.profileImage();
   }
 }
 
-
-// const profilePicture = ref("");
-// const first_name = ref("");
-// const last_name = ref("");
-// const contact_number = ref("");
-// const email = ref("");
-// const password = ref("");
-// const confirmpassword = ref("");
-// const showPassword = ref(false);
-// const router = useRouter();
-// const $q = useQuasar();
-
-// // Check for authentication token
-// const checkAuth = () => {
-//   const token = localStorage.getItem('token');
-//   if (!token) {
-//     $q.notify({
-//       type: 'negative',
-//       message: 'Please log in to access this page'
-//     });
-//     router.push('/signin');
-//   }
-//   return token;
-// };
-
-// onMounted(() => {
-//   const token = checkAuth();
-//   if (token) {
-//     fetchUserData(token);
-//   }
-// });
-
-// const fetchUserData = async (token) => {
-//   try {
-//     const response = await fetch('http://localhost/raj-express/backend/controller/profile.php', {
-//       headers: {
-//         'Authorization': `Bearer ${token}`
-//       }
-//     });
-//     if (!response.ok) {
-//       throw new Error('Failed to fetch user data');
-//     }
-//     const userData = await response.json();
-//     first_name.value = userData.first_name;
-//     last_name.value = userData.last_name;
-//     email.value = userData.email;
-//     contact_number.value = userData.contact_number;
-//     profilePicture.value = userData.profile_picture || "";
-//   } catch (error) {
-//     console.error('Error fetching user data:', error);
-//     $q.notify({
-//       type: 'negative',
-//       message: 'Failed to load user data. Please try again.'
-//     });
-//   }
-// };
-
-// const togglePasswordVisibility = () => {
-//   showPassword.value = !showPassword.value;
-// };
-
-// const signup = async () => {
-//   if (password.value !== confirmpassword.value) {
-//     $q.notify({
-//       type: 'negative',
-//       message: 'Passwords do not match!'
-//     });
-//     return;
-//   }
-
-//   const token = checkAuth();
-//   if (!token) return;
-
-//   const userData = {
-//     first_name: first_name.value,
-//     last_name: last_name.value,
-//     contact_number: contact_number.value,
-//     email: email.value,
-//     password: password.value,
-//     profile_picture: profilePicture.value,
-//   };
-
-//   try {
-//     const response = await axios.get('http://localhost/raj-express/backend/controller/userController/update_profile.php', {
-//       headers: {
-//         'Content-Type': 'application/json',
-//         'Authorization': token
-//       },
-//       body: JSON.stringify(userData)
-//     });
-
-//     if (!response.ok) {
-//       throw new Error('Failed to update profile');
-//     }
-
-//     const result = await response.json();
-//     $q.notify({
-//       type: 'positive',
-//       message: 'Profile updated successfully'
-//     });
-//   } catch (error) {
-//     console.error('Error updating profile:', error);
-//     $q.notify({
-//       type: 'negative',
-//       message: 'Failed to update profile. Please try again.'
-//     });
-//   }
-// };
-
-// const uploadImage = () => {
-//   // Logic for uploading and updating the profile picture
-//   // This can be a file input dialog
-//   document.getElementById("file-input").click();
-// };
-
-// const handleFileUpload = async (event) => {
-//   const file = event.target.files[0];
-//   if (file) {
-//     const formData = new FormData();
-//     formData.append("profile_picture", file);
-
-//     try {
-//       const response = await fetch('http://localhost/raj-express/backend/uploads/', {
-//         method: "POST",
-//         body: formData
-//       });
-//       const result = await response.json();
-//       if (response.ok) {
-//         profilePicture.value = result.url; 
-//       } else {
-//         alert("Failed to upload profile picture.");
-//       }
-//     } catch (error) {
-//       alert("An error occurred while uploading the profile picture.");
-//     }
-//   }
-// };
-
-
-// const goToMenu = () => {
-//   router.push("/menu"); // Navigate to the previous page or profile info page
-// };
 </script>
 
 <style scoped>

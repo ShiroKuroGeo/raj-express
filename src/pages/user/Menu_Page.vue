@@ -158,36 +158,56 @@ export default {
     const goToAddress = () => router.push('/address');
     const goToMessages = () => router.push('/messages');
 
-    const deleteAccount = () => {
-      $q.dialog({
-        title: 'Confirm',
-        message: 'Are you sure you want to delete your account? This action cannot be undone.',
-        cancel: true,
-        persistent: true
-      }).onOk(async () => {
-        try {
-          const token = localStorage.getItem('token');
-          await axios.delete('http://localhost/raj-express/backend/auth/delete_account.php', {
-            headers: {
-              'Authorization': `Bearer ${token}`
+    const deleteAccount = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost/raj-express/backend/controller/userController/deletionAccount.php',{
+            headers:{
+              'Authorization': token
             }
-          });
-          store.actions.logout();
-          router.push('/');
-          $q.notify({
-            color: 'positive',
-            message: 'Your account has been deleted successfully.',
-            icon: 'check_circle'
-          });
-        } catch (error) {
-          console.error('Error deleting account:', error);
-          $q.notify({
-            color: 'negative',
-            message: 'Failed to delete account. Please try again.',
-            icon: 'report_problem'
-          });
+        });
+
+        if (!response.ok) {
+          const errorMessage = await response.text();
+          throw new Error(`HTTP error! status: ${response.status}, message: ${errorMessage}`);
         }
-      });
+
+        const result = await response.json();
+        console.log(result);
+
+      } catch (error) {
+        console.log('Error in ' + error);
+      }
+
+      // $q.dialog({
+      //   title: 'Confirm',
+      //   message: 'Are you sure you want to delete your account? This action cannot be undone.',
+      //   cancel: true,
+      //   persistent: true
+      // }).onOk(async () => {
+      //   try {
+      //     const token = localStorage.getItem('token');
+      //     await axios.delete('http://localhost/raj-express/backend/auth/delete_account.php', {
+      //       headers: {
+      //         'Authorization': token
+      //       }
+      //     });
+      //     store.actions.logout();
+      //     router.push('/');
+      //     $q.notify({
+      //       color: 'positive',
+      //       message: 'Your account has been deleted successfully.',
+      //       icon: 'check_circle'
+      //     });
+      //   } catch (error) {
+      //     console.error('Error deleting account:', error);
+      //     $q.notify({
+      //       color: 'negative',
+      //       message: 'Failed to delete account. Please try again.',
+      //       icon: 'report_problem'
+      //     });
+      //   }
+      // });
     };
 
     const logout = () => {

@@ -134,6 +134,7 @@ export default {
           this.cartItems.forEach(item => {
             orderData.push({
               user_id: token,
+              cart_id: item.cart_id,
               product_id: item.product_id,
               address_id: this.selectedAddress,
               order_qty: item.quantity,

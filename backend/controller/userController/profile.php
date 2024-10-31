@@ -41,6 +41,7 @@ try {
             "ln" => $user['last_name'],
             "number" => $user['contact_number'],
             "mail" => $user['email'],
+            "profilePicture" => $user['profile_img'],
         ]);
     } else {
         sendResponse(["error" => "Address not found"], 404);

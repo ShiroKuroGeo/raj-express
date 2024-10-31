@@ -27,6 +27,7 @@ try {
         $db = $database->getDb();
     
         foreach ($data['orders'] as $order) {
+            // Inserting The payment first 
             $payment = "INSERT INTO `payments`(`user_id`, `payment_method`, `payment_total`, `payment_status`) VALUES (:user_id, :payment_method, :payment_total, :payment_status)";
             $paymentStmt = $db->prepare($payment);
             $paymentStmt->bindParam(":user_id", $order['user_id']);
@@ -37,6 +38,7 @@ try {
             $paymentId = $db->lastInsertId();
     
             if ($paymentId) {
+                // Placing Order then erase cart
                 $orderQuery = "INSERT INTO `orders`(`user_id`, `product_id`, `address_id`, `payment_id`, `order_qty`, `extra`) VALUES (:user_id, :product_id, :address_id, :payment_id, :order_qty, :extra)";
                 $orderStmt = $db->prepare($orderQuery);
                 $orderStmt->bindParam(":user_id", $order['user_id']);
@@ -45,7 +47,20 @@ try {
                 $orderStmt->bindParam(":payment_id", $paymentId);
                 $orderStmt->bindParam(":order_qty", $order['order_qty']);
                 $orderStmt->bindParam(":extra", $order['extra']);
-                $orderStmt->execute();
+                $result = $orderStmt->execute();
+
+                if($result){
+                    $cartQuery = "UPDATE `carts` SET `status` = :stat WHERE cart_id = :cart_id";
+                    $statusOrder = 'ordered';
+                    $cartStmt = $db->prepare($cartQuery);
+                    $cartStmt->bindParam(":cart_id", $order['cart_id']);
+                    $cartStmt->bindParam(":stat", $statusOrder);
+                    $cartResult = $cartStmt->execute();
+
+                }else{
+                    sendJsonResponse(["error" => "Failed to create payment record."], 409);
+                }
+                
             } else {
                 sendJsonResponse(["error" => "Failed to create payment record."], 500);
             }
