@@ -1,26 +1,20 @@
 <template>
   <q-layout view="hHh lpR fFf">
-    <!-- HEADER -->
     <q-header elevated class="bg-orange text-white">
       <q-toolbar>
-        <!-- BURGER MENU TOGGLE -->
         <q-btn dense flat round icon="menu" @click="toggleDrawer" />
 
         <q-toolbar-title>
           <div style="display: flex; align-items: center;">
-            <!-- Logo -->
-            <img src="/icons/logo.png" alt="logo" style="height: 40px; margin-right: 10px;" />
-            <!-- Name next to the Logo -->
+            <img src="/icsons/logo.png" alt="logo" style="height: 40px; margin-right: 10px;" />
             <span>R.A.J Food Express</span>
           </div>
         </q-toolbar-title>
 
-        <!-- Dark Mode Toggle -->
         <q-btn flat round @click="toggleDarkMode">
           <q-icon :name="darkMode ? 'brightness_4' : 'brightness_7'" />
         </q-btn>
 
-        <!-- User Avatar -->
         <div>
           <q-btn flat>{{ userFirstName }}</q-btn>
           <q-btn flat round @click="toggleMenu">
@@ -42,11 +36,8 @@
       </q-toolbar>
     </q-header>
 
-    <!-- DRAWER / SIDEBAR -->
     <q-drawer v-model="drawer" width="250" bordered :class="drawerBgClass">
       <q-list padding>
-        <!-- NAVIGATION TO PAGES -->
-        <!-- Add search bar here -->
         <q-item>
           <q-input
             v-model="searchQuery"
@@ -84,7 +75,6 @@
       </q-list>
     </q-drawer>
 
-    <!-- PAGE CONTENT - Dynamically Loaded Pages -->
     <q-page-container>
       <router-view />
     </q-page-container>

@@ -1,19 +1,14 @@
-<!-- src/pages/admin/Dashboard.vue -->
 <template>
   <q-page padding>
     <h4 class="q-mb-md">Welcome, {{ adminName }}.</h4>
-    <p class="text-grey-8">Hello, here's what happening with your R.A.J business today.</p>
+    <p class="text-grey-8">Here’s what’s happening with your R.A.J. business today.</p>
 
     <div class="row q-col-gutter-md">
       <div class="col-md-8 col-sm-12">
         <q-card>
           <q-card-section>
             <div class="text-h6">Order Statistics</div>
-            <q-btn-toggle
-              v-model="orderStatsTimeframe"
-              flat
-              stretch
-              toggle-color="primary"
+            <q-btn-toggle v-model="orderStatsTimeframe" flat stretch toggle-color="primary"
               :options="[
                 {label: 'This Month', value: 'month'},
                 {label: 'This Week', value: 'week'},
@@ -102,9 +97,16 @@ export default {
   name: 'AdminDashboard',
   data () {
     return {
+      adminName: 'Seleno Shiro',
       orderStatsTimeframe: 'month',
       earningStatsTimeframe: 'month'
     }
+  },
+  methods:{
+
+  },
+  created(){
+    
   }
 }
 </script>

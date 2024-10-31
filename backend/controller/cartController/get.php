@@ -1,27 +1,16 @@
 <?php
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
+include '../controller.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit();
-}
+$set = new controller();
+
+$set->setCorsOrigin();
+
+$data = $set->setInputData();
 
 $headers = apache_request_headers();
 $authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : '';
 
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 include "../../connection/dbconfig.php"; 
-
-function sendResponse($data, $status = 200) {
-    http_response_code($status);
-    echo json_encode($data);
-}
-
-$response = [];
 
 try {
     $database = new Database();
@@ -33,13 +22,13 @@ try {
 
     if ($stmt->rowCount() > 0) {
         $cart = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        sendResponse([
+        $set->sendJsonResponse([
             "success" => true,
             "cartItems" => $cart,
         ]);
     } else {
-        sendResponse(["error" => "Cart not found"], 404);
+        $set->sendJsonResponse(["error" => "Cart not found"], 404);
     }
 } catch (PDOException $e) {
-    sendResponse(["error" => "Database error: " . $e->getMessage()], 500);
+    $set->sendJsonResponse(["error" => "Database error: " . $e->getMessage()], 500);
 }

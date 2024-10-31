@@ -1,39 +1,15 @@
 <?php
-// At the very beginning of the file
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+include '../controller/controller.php';
 
-// Function to send JSON response
-function sendJsonResponse($data, $statusCode = 200) {
-    http_response_code($statusCode);
-    header("Content-Type: application/json");
-    echo json_encode($data);
-    exit;
-}
+$set = new controller();
 
-// Set headers
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type");
-
-// Handle preflight OPTIONS request
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    sendJsonResponse([], 200);
-}
-
-// Check if the request method is POST
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    sendJsonResponse(["error" => "Method not allowed"], 405);
-}
+$set->setCorsOrigin();
 
 try {
     include_once '../connection/dbconfig.php';
 
-    // Log the inclusion of dbconfig.php
     error_log("dbconfig.php included successfully");
 
-    // Get the posted data
     $input = file_get_contents("php://input");
     error_log("Received raw input: " . $input);
 
@@ -41,7 +17,7 @@ try {
 
     if (json_last_error() !== JSON_ERROR_NONE) {
         error_log("JSON decode error: " . json_last_error_msg());
-        sendJsonResponse(["error" => "Invalid JSON input: " . json_last_error_msg()], 400);
+        $set->sendJsonResponse(["error" => "Invalid JSON input: " . json_last_error_msg()], 400);
     }
 
     error_log("Decoded data: " . print_r($data, true));
@@ -50,7 +26,7 @@ try {
     $required_fields = ['first_name', 'last_name', 'email', 'password', 'user_type', 'status'];
     foreach ($required_fields as $field) {
         if (empty($data[$field])) {
-            sendJsonResponse(["error" => "$field is required"], 400);
+            $set->sendJsonResponse(["error" => "$field is required"], 400);
         }
     }
 
@@ -65,7 +41,7 @@ try {
     $check_stmt->execute();
 
     if ($check_stmt->rowCount() > 0) {
-        sendJsonResponse(["error" => "Email already exists"], 400);
+        $set->sendJsonResponse(["error" => "Email already exists"], 400);
     }
 
     // Prepare the SQL query for insertion
@@ -89,16 +65,16 @@ try {
 
     // Execute the query
     if ($stmt->execute()) {
-        sendJsonResponse(["message" => "User registered successfully"], 201);
+        $set->sendJsonResponse(["message" => "User registered successfully"], 201);
     } else {
-        sendJsonResponse(["error" => "Unable to register user"], 500);
+        $set->sendJsonResponse(["error" => "Unable to register user"], 500);
     }
 } catch (PDOException $e) {
     error_log("Database error: " . $e->getMessage());
     error_log("Stack trace: " . $e->getTraceAsString());
-    sendJsonResponse(["error" => "A database error occurred: " . $e->getMessage()], 500);
+    $set->sendJsonResponse(["error" => "A database error occurred: " . $e->getMessage()], 500);
 } catch (Exception $e) {
     error_log("General error: " . $e->getMessage());
     error_log("Stack trace: " . $e->getTraceAsString());
-    sendJsonResponse(["error" => "An unexpected error occurred: " . $e->getMessage()], 500);
+    $set->sendJsonResponse(["error" => "An unexpected error occurred: " . $e->getMessage()], 500);
 }

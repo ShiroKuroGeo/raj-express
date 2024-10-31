@@ -66,35 +66,35 @@ export default {
       ],
     };
   },
-  mounted() {
-    this.fetchCustomers();
-  },
   methods: {
-    fetchCustomers() {
-      axios
-        .get("http://localhost/api/customers.php")
-        .then((response) => {
-          this.customers = response.data;
-        })
-        .catch((error) => {
-          console.error(error);
-        });
+    async fetchCustomers() {
+      try {
+        const response = await axios.get('http://localhost/raj-express/backend/controller/adminController/userController/userList.php');
+
+        // this.customers = response
+
+      } catch (error) {
+        console.log('Error in ' + error);
+      }
     },
     viewCustomer(id) {
       alert(`Viewing customer with ID: ${id}`);
     },
-    deleteCustomer(id) {
-      if (confirm("Are you sure you want to delete this customer?")) {
-        axios
-          .post("http://localhost/api/delete_customer.php", { id: id })
-          .then(() => {
-            this.fetchCustomers();
-          })
-          .catch((error) => {
-            console.error(error);
-          });
-      }
-    },
+    // deleteCustomer(id) {
+    //   if (confirm("Are you sure you want to delete this customer?")) {
+    //     axios
+    //       .post("http://localhost/api/delete_customer.php", { id: id })
+    //       .then(() => {
+    //         this.fetchCustomers();
+    //       })
+    //       .catch((error) => {
+    //         console.error(error);
+    //       });
+    //   }
+    // },
+  },
+  mounted() {
+    this.fetchCustomers();
   },
 };
 </script>

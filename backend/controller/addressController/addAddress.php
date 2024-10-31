@@ -1,33 +1,14 @@
 
 <?php
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
+include '../controller.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit();
-}
+$set = new controller();
 
-$input = file_get_contents("php://input");
-$data = json_decode($input, true);
+$set->setCorsOrigin();
+
+$data = $set->setInputData();
 
 include "../../connection/dbconfig.php"; 
-
-function sendJsonResponse($data, $statusCode = 200) {
-    http_response_code($statusCode);
-    header("Content-Type: application/json");
-    
-    $json = json_encode($data);
-    
-    if ($json === false) {
-        http_response_code(500);
-        echo json_encode(["error" => "Failed to encode JSON"]);
-    } else {
-        echo $json;
-    }
-    exit;
-}
 
 try {
     $database = new Database();
@@ -46,10 +27,10 @@ try {
     $stmt->bindParam(":landmark",  $data['landmark']);
 
     if ($stmt->execute()) {
-        sendJsonResponse(["success" => "Successfully add address!"], 200);
+        $set->sendJsonResponse(["success" => "Successfully add address!"], 200);
     } else {
-        sendJsonResponse(["error" => "Failed to add address"], 400);
+        $set->sendJsonResponse(["error" => "Failed to add address"], 400);
     }
 } catch (PDOException $e) {
-    sendJsonResponse(["error" => "Database error: " . $e->getMessage()], 500);
+    $set->sendJsonResponse(["error" => "Database error: " . $e->getMessage()], 500);
 }

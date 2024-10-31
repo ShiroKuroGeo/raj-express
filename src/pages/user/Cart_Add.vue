@@ -125,6 +125,8 @@ export default {
         const response = await axios.get('http://localhost/raj-express/backend/controller/addOnController/get.php');
         const data = response.data;
 
+        console.log(data);
+
         addons.value = data.addOnsItems.map(item => ({
           ...item,
           selected: false, 
@@ -134,7 +136,6 @@ export default {
       } catch (error) {
         console.error('Error fetching specials:', error);
       }
-
 
     }
 

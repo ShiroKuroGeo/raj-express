@@ -1,41 +1,16 @@
 <?php
-// Enable error reporting for debugging
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+include '../controller/controller.php';
 
-// Function to send JSON response
-function sendJsonResponse($data, $statusCode = 200) {
-    http_response_code($statusCode);
-    header("Content-Type: application/json");
-    echo json_encode($data);
-    exit;
-}
+$set = new controller();
 
-// Set headers for CORS
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
-header("Access-Control-Allow-Credentials: true");
-header("Access-Control-Max-Age: 3600");
-
-// Handle preflight OPTIONS request
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit();
-}
-
-// Check if the request method is POST
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    sendJsonResponse(["error" => "Method not allowed"], 405);
-}
+$set->setCorsOrigin();
 
 try {
     include_once '../connection/dbconfig.php';
 
     error_log("dbconfig.php included successfully");
 
-    $data = json_decode(file_get_contents('php://input'), true);
+    $data = $set->setInputData();
 
     // Get the posted data
     $email = $data['email'] ?? null;
