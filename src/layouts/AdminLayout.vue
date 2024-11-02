@@ -6,7 +6,7 @@
 
         <q-toolbar-title>
           <div style="display: flex; align-items: center;">
-            <img src="/icsons/logo.png" alt="logo" style="height: 40px; margin-right: 10px;" />
+            <img src="/backend/uploads/671a2b4a4fcf5_fried-chicken-recipe-1-500x433-removebg-preview.png" alt="logo" style="height: 40px; margin-right: 10px;" />
             <span>R.A.J Food Express</span>
           </div>
         </q-toolbar-title>

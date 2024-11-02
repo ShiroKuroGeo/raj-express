@@ -4,7 +4,7 @@
       :rows="customers"
       :columns="columns"
       row-key="id"
-      title="Customers"
+      title="Users"
     >
       <template v-slot:body-cell-action="props">
         <q-btn
@@ -31,38 +31,12 @@ export default {
     return {
       customers: [],
       columns: [
-        { name: "id", label: "ID", align: "left", field: (row) => row.id },
-        {
-          name: "name",
-          label: "Customer Name",
-          align: "left",
-          field: (row) => row.name,
-        },
-        {
-          name: "phone",
-          label: "Customer Info",
-          align: "left",
-          field: (row) => row.phone,
-        },
-        {
-          name: "orders",
-          label: "Total Orders",
-          align: "left",
-          field: (row) => row.orders,
-        },
-        {
-          name: "amount",
-          label: "Total Order Amount",
-          align: "left",
-          field: (row) => row.amount,
-        },
-        {
-          name: "status",
-          label: "Status",
-          align: "left",
-          field: (row) => row.status,
-        },
-        { name: "action", label: "Actions", align: "left" },
+        { name: "user_id", label: "User ID", align: "left", field: (row) => row.user_id },
+        { name: "first_name", label: "First Name", align: "left", field: (row) => row.first_name },
+        { name: "last_name", label: "Last Name", align: "left", field: (row) => row.last_name },
+        { name: "address", label: "Address", align: "left", field: (row) => row.address },
+        { name: "contact_number", label: "Contact Number", align: "left", field: (row) => row.contact_number },
+        { name: "action", label: "Actions", align: "left" }
       ],
     };
   },
@@ -70,9 +44,8 @@ export default {
     async fetchCustomers() {
       try {
         const response = await axios.get('http://localhost/raj-express/backend/controller/adminController/userController/userList.php');
-
-        // this.customers = response
-
+        this.customers = response.data.userDatas;
+        console.log(response.data.userDatas);
       } catch (error) {
         console.log('Error in ' + error);
       }
@@ -80,18 +53,6 @@ export default {
     viewCustomer(id) {
       alert(`Viewing customer with ID: ${id}`);
     },
-    // deleteCustomer(id) {
-    //   if (confirm("Are you sure you want to delete this customer?")) {
-    //     axios
-    //       .post("http://localhost/api/delete_customer.php", { id: id })
-    //       .then(() => {
-    //         this.fetchCustomers();
-    //       })
-    //       .catch((error) => {
-    //         console.error(error);
-    //       });
-    //   }
-    // },
   },
   mounted() {
     this.fetchCustomers();
