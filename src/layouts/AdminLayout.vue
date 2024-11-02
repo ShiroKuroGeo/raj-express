@@ -142,7 +142,7 @@ const menuItems = [
     label: 'User Management',
     icon: 'people',
     children: [
-      { label: 'Customer List', icon: 'group', to: '/list/customers' }
+      { label: 'User Management', icon: 'group', to: '/list/customers' }
     ]
   }
 ]
