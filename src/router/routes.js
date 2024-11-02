@@ -21,7 +21,7 @@ const routes = [
     ],
   },
     {
-      path: '/pos', // Base path for POS section where admin can add new sale, add new product, manage categories, and see all orders
+      path: '/pos', 
       component: () => import('layouts/AdminLayout.vue'),
       children: [
         { path: 'new-sale', name: 'new-sale', component: () => import('pages/admin/PosNewSale.vue') },
@@ -34,7 +34,7 @@ const routes = [
       ]
     },
     {
-      path: '/orders', // Base path for ORDER MANGEMENT section where admin can see all orders and manage them
+      path: '/orders',
       component: () => import('layouts/AdminLayout.vue'),
       children: [
         { path: 'all', component: () => import('pages/admin/All_Orders.vue') }, // NewSale route
@@ -47,7 +47,7 @@ const routes = [
       ],
     },
     {
-      path: '/products', // Base path for PRODUCT MANAGEMENT section where admin can add new sale, add new product, manage categories, and see all reviews
+      path: '/products',
       component: () => import('layouts/AdminLayout.vue'),
       children: [
         { path: 'add', component: () => import('pages/admin/Product_Add_U.vue') }, // NewSale route
@@ -57,14 +57,14 @@ const routes = [
       ],
     },
     {
-      path: '/support',// Base path for SUPPORT section where admin can send message to customer
+      path: '/support',
       component: () => import('layouts/AdminLayout.vue'),
       children: [
         { path: 'message', component: () => import('pages/admin/Message.vue') },
       ],
     },
     {
-      path: '/reports', // Base path for REPORTS section where admin can see the reports of earnings, orders, sales, expenses, and summary
+      path: '/reports', 
       component: () => import('layouts/AdminLayout.vue'),
       children: [
         { path: 'earnings', component: () => import('pages/admin/Earning_Reports.vue') },
@@ -72,18 +72,16 @@ const routes = [
         { path: 'sale', component: () => import('pages/admin/Sale_Report.vue') },
         { path: 'expenses', component: () => import('pages/admin/Expenses_Reports.vue') },
         { path: 'summary', component: () => import('pages/admin/ExpensesSummary.vue') },
-
-
       ]
     },
     {
-      path: '/list', // Base path for CUSTOMER LIST section where admin can see the list of customers and their invoices and their orders history
+      path: '/list',
         component: () => import('layouts/AdminLayout.vue'),
         children: [
           { path: 'customers', component: () => import('pages/admin/Customer_List.vue') },
           { path: 'invoices', component: () => import('pages/admin/Customer_Invioce.vue') },
           { path: 'customer-orders', component: () => import('pages/admin/Customer_viewOrders.vue') },
-          { path: 'customer-details', component: () => import('pages/admin/Customer_Details.vue') },
+          { path: 'customer-details/:id', name: 'CustomerDetails', component: () => import('pages/admin/Customer_Details.vue') },
         ],
     },
     // {

@@ -9,9 +9,9 @@
 
     <div class="row q-col-gutter-md q-mb-md">
       <div class="col-12">
-        <h6 class="q-my-none">Customer ID #{{ customer.id }}</h6>
-        <q-badge color="grey" class="q-mt-xs">
-          Joined at: {{ customer.joined_at }}
+        <h6 class="q-my-none text-capitalize">Customer ID #{{ user_id }}</h6>
+        <q-badge color="grey" class="q-mt-xs text-capitalize">
+          Joined at: {{ formattedDate(created_at) }}
         </q-badge>
       </div>
     </div>
@@ -20,19 +20,19 @@
       <div class="col-12 col-md-8">
         <div class="row items-center q-col-gutter-md">
           <div class="col-grow">
-            <h6 class="q-my-none">Order List <q-badge color="primary" rounded>{{ customer.orders.length }}</q-badge></h6>
+            <h6 class="q-my-none text-capitalize">Status List <q-badge color="primary" rounded>{{ status }}</q-badge></h6>
           </div>
-          <div class="col-auto">
+          <!-- <div class="col-auto">
             <q-input v-model="searchOrderId" dense outlined placeholder="Search by order ID">
               <template v-slot:append>
                 <q-btn color="primary" label="Search" @click="searchOrder" />
               </template>
             </q-input>
-          </div>
+          </div> -->
         </div>
 
-        <q-table
-          :rows="customer.orders"
+        <!-- <q-table
+          :rows="orders"
           :columns="orderColumns"
           row-key="id"
           flat
@@ -44,23 +44,23 @@
               <q-btn flat round color="primary" icon="receipt_long" @click="viewInvoice(props.row.id)" />
             </q-td>
           </template>
-        </q-table>
+        </q-table> -->
       </div>
 
       <div class="col-12 col-md-4">
         <q-card flat bordered>
           <q-card-section>
-            <div class="text-h6">{{ customer.name }}</div>
+            <div class="text-h6 text-capitalize">{{ last_name }}, {{ first_name }}</div>
             <q-item>
               <q-item-section avatar>
                 <q-avatar>
-                  <img :src="customer.avatar">
+                  <img :src="`http://localhost/raj-express/backend/uploads/` + profile_img">
                 </q-avatar>
               </q-item-section>
               <q-item-section>
-                <q-item-label>{{ customer.email }}</q-item-label>
-                <q-item-label caption>{{ customer.phone }}</q-item-label>
-                <q-item-label caption>{{ customer.orders.length }} Orders</q-item-label>
+                <q-item-label class="text-capitalize" >{{ email }}</q-item-label>
+                <q-item-label class="text-capitalize" caption>{{ contact_number }}</q-item-label>
+                <q-item-label class="text-capitalize" caption>{{ status }} Status</q-item-label>
               </q-item-section>
             </q-item>
           </q-card-section>
@@ -70,14 +70,14 @@
           <q-card-section>
             <div class="text-h6">Addresses</div>
             <q-list>
-              <q-item v-for="address in customer.addresses" :key="address.id">
+              <q-item v-for="address in addresses" :key="address.address_id">
                 <q-item-section avatar>
-                  <q-icon :name="address.type === 'home' ? 'home' : 'business'" />
+                  <q-icon name="map" />
                 </q-item-section>
                 <q-item-section>
-                  <q-item-label>{{ address.type === 'home' ? 'Home' : 'Work' }}</q-item-label>
-                  <q-item-label caption>{{ address.phone }}</q-item-label>
-                  <q-item-label caption>{{ address.full_address }}</q-item-label>
+                  <q-item-label>{{ address.deliveryAddress }}</q-item-label>
+                  <q-item-label caption>{{ address.phoneNumber }}</q-item-label>
+                  <q-item-label caption>{{ address.streetNumber }}, {{ address.landmark }}</q-item-label>
                 </q-item-section>
               </q-item>
             </q-list>
@@ -97,59 +97,83 @@
 <script>
 import { defineComponent, ref, onMounted } from 'vue'
 import { useQuasar } from 'quasar'
+import axios from 'axios'
 
 export default defineComponent({
   name: 'CustomerDetails',
-
-  setup() {
-    const $q = useQuasar()
-    const customer = ref({})
-    const searchOrderId = ref('')
-    const orderColumns = [
-      { name: 'id', label: 'NO.', field: 'id', sortable: true, align: 'left' },
-      { name: 'order_id', label: 'Order ID', field: 'order_id', sortable: true, align: 'left' },
-      { name: 'total_amount', label: 'Total Amount', field: 'total_amount', sortable: true, align: 'left' },
-      { name: 'action', label: 'Action', field: 'action', align: 'center' }
-    ]
-
-    onMounted(async () => {
-      try {
-        const response = await fetch('/api/customer-details.php')
-        customer.value = await response.json()
-      } catch (error) {
-        console.error('Error fetching customer details:', error)
-        $q.notify({
-          color: 'negative',
-          message: 'Failed to load customer details'
-        })
+  data(){
+    return{
+      addresses: [],
+      user_id: '',
+      first_name: '',
+      last_name: '',
+      address: '',
+      contact_number: '',
+      email: '',
+      profile_img: '',
+      status: '',
+      created_at: '',
+      date_deletion: '',
+    }
+  },
+  methods:{
+    async fetchUser(){
+      try{
+        const response = await axios.get('http://localhost/raj-express/backend/controller/adminController/userController/userDetails.php',{
+          headers:{
+            'Authorization': this.$route.params.id
+          }
+        });
+        const data = response.data;
+        this.user_id = response.data.user_id;
+        this.first_name = response.data.first_name;
+        this.last_name = response.data.last_name;
+        this.address = response.data.address;
+        this.contact_number = response.data.contact_number;
+        this.email = response.data.email;
+        this.profile_img = response.data.profile_img == null ? "profile.jpg" : response.data.profile_img;
+        this.status = response.data.status;
+        this.created_at = response.data.created_at;
+        this.date_deletion = response.data.date_deletion;
+      }catch(error){
+        console.log('Error in ' + error);
       }
-    })
+    },
+    async fetchAddressess(){
+      try{
+        const response = await axios.get('http://localhost/raj-express/backend/controller/adminController/userController/userAddresses.php',{
+          headers:{
+            'Authorization': this.$route.params.id
+          }
+        });
+        this.addresses = response.data.addressess;
+      }catch(error){
+        console.log('Error in ' + error);
+      }
+    },
+    formattedDate(dateString) {
+        // Ensure the date string is in a recognizable format
+        const date = new Date(dateString.replace(" ", "T"));
+        
+        // Check if the date is valid
+        if (isNaN(date)) {
+          return "Invalid date";
+        }
 
-    const searchOrder = () => {
-      // Implement order search functionality
-    }
+        return new Intl.DateTimeFormat("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric"
+        }).format(date);
 
-    const viewOrder = (orderId) => {
-      // Implement view order functionality
+    },
+    goToDashboard () {
+      this.$router.back();
     }
-
-    const viewInvoice = (orderId) => {
-      // Implement view invoice functionality
-    }
-
-    const goToDashboard = () => {
-      // Implement navigation to dashboard
-    }
-
-    return {
-      customer,
-      searchOrderId,
-      orderColumns,
-      searchOrder,
-      viewOrder,
-      viewInvoice,
-      goToDashboard
-    }
+  },
+  created(){
+    this.fetchUser();
+    this.fetchAddressess();
   }
 })
 </script>

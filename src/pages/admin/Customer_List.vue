@@ -52,7 +52,7 @@ export default {
       }
     },
     viewCustomer(id) {
-      alert(`Viewing customer with ID: ${id}`);
+      this.$router.push({ name: 'CustomerDetails', params: { id } });
     },
     async deactiveUser(status, userId) {
       status = status == 'active' ? 'inactive' : 'active';
