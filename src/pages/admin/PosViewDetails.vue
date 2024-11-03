@@ -1,6 +1,6 @@
 <template>
   <q-page class="q-pa-md">
-    <q-card v-if="order">
+    <q-card v-for="order in orders">
       <q-card-section>
         <div class="text-h6">Order Details</div>
       </q-card-section>
@@ -12,7 +12,7 @@
               <q-item>
                 <q-item-section>
                   <q-item-label caption>Order Number</q-item-label>
-                  <q-item-label>{{ order.order_number || 'N/A' }}</q-item-label>
+                  <q-item-label>{{ order.order_id || 'N/A' }}</q-item-label>
                 </q-item-section>
               </q-item>
               <q-item>
@@ -34,13 +34,13 @@
               <q-item>
                 <q-item-section>
                   <q-item-label caption>Total Items</q-item-label>
-                  <q-item-label>{{ order.total_items || 'N/A' }}</q-item-label>
+                  <q-item-label>{{ order.qty || 'N/A' }}</q-item-label>
                 </q-item-section>
               </q-item>
               <q-item>
                 <q-item-section>
                   <q-item-label caption>Order Total</q-item-label>
-                  <q-item-label>{{ order.order_total ? formatCurrency(order.order_total) : 'N/A' }}</q-item-label>
+                  <q-item-label>{{ order.payment_total ? formatCurrency(order.payment_total) : 'N/A' }}</q-item-label>
                 </q-item-section>
               </q-item>
             </q-list>
@@ -49,14 +49,24 @@
       </q-card-section>
 
       <q-card-section>
-        <div class="text-h6">Order Items</div>
-        <q-table
-          :rows="order.products || []"
-          :columns="productColumns"
-          row-key="product_id"
-          flat
-          bordered
-        >
+        <div class="text-h6">Products Items</div>
+        <q-table :rows="products" :columns="productsON" row-key="name" flat bordered>
+          <template v-slot:body-cell-product_image="props">
+            <q-td :props="props" align="left">
+              <img :src="'http://localhost/raj-express/backend/uploads/'+props.row.product_image" alt="Product Image" style="width: 50px; height: auto;">
+            </q-td>
+          </template>
+          <template v-slot:body-cell-price="props">
+            <q-td :props="props">
+              {{ formatCurrency(props.value) }}
+            </q-td>
+          </template>
+        </q-table>
+      </q-card-section>
+
+      <q-card-section>
+        <div class="text-h6">Adds On Items</div>
+        <q-table :rows="order.extra" :columns="addsOns" row-key="name" flat bordered>
           <template v-slot:body-cell-price="props">
             <q-td :props="props">
               {{ formatCurrency(props.value) }}
@@ -71,10 +81,6 @@
       </q-card-actions>
     </q-card>
 
-    <div v-else class="text-center q-pa-md">
-      <q-spinner color="primary" size="3em" />
-      <p>Loading order details...</p>
-    </div>
   </q-page>
 </template>
 
@@ -89,12 +95,20 @@ export default {
   setup() {
     const route = useRoute();
     const router = useRouter();
-    const order = ref(null);
+    const orders = ref([]);
+    const products = ref([]);
 
-    const productColumns = [
-      { name: 'product_name', label: 'Product', field: 'product_name', align: 'left' },
-      { name: 'quantity', label: 'Quantity', field: 'quantity', align: 'center' },
-      { name: 'price', label: 'Price', field: 'price', align: 'right' },
+    const addsOns = [
+      { name: 'addson', label: 'Adds On', field: (row) => row.name, align: 'left' },
+      { name: 'quantity', label: 'Quantity', field: (row) => row.quantity, align: 'center' },
+      { name: 'price', label: 'Price', field: (row) => row.price, align: 'right' },
+    ];
+
+    const productsON = [
+      { name: 'product_image', label: 'Product Image', field: row => 'http://localhost/raj-express/backend/uploads/' + row.product_image, align: 'left' },
+      { name: 'product_name', label: 'Product Name', field: (row) => row.product_name, align: 'center' },
+      { name: 'product_price', label: 'Price', field: (row) => row.product_price, align: 'center' },
+      { name: 'product_id', label: 'Product Id', field: (row) => row.product_id, align: 'right' },
     ];
 
     const formatCurrency = (value) => {
@@ -116,54 +130,33 @@ export default {
 
     const fetchOrderDetails = async () => {
       try {
-        const orderNumber = decodeURIComponent(route.params.id);
-        console.log('Fetching order details for order number:', orderNumber);
+        const token = route.params.id;
 
-        const url = 'http://localhost/raj-express/backend/controller/pos_viewdetails.php';
-        const params = {
-          action: 'get_order_details',
-          order_number: orderNumber
-        };
-        console.log('Request URL:', url);
-        console.log('Request params:', params);
-
-        console.log('Sending request...');
-        const response = await axios.get(url, { params });
-        console.log('Received response');
-
-        console.log('Response status:', response.status);
-        console.log('Response headers:', response.headers);
-        console.log('Response data:', response.data);
-
-        if (response.data && response.data.products) {
-          // Assuming the backend returns the order details directly
-          order.value = {
-            ...response.data,
-            success: true // Add this flag manually
-          };
-          console.log('Order details:', order.value);
-        } else {
-          console.error('Invalid response format:', response.data);
-          throw new Error('Invalid response format');
-        }
-      } catch (error) {
-        console.error('Error fetching order details:', error);
-        if (axios.isAxiosError(error)) {
-          console.error('Axios error:', error.toJSON());
-          if (error.response) {
-            console.error('Error data:', error.response.data);
-            console.error('Error status:', error.response.status);
-            console.error('Error headers:', error.response.headers);
-          } else if (error.request) {
-            console.error('Error request:', error.request);
-          } else {
-            console.error('Error message:', error.message);
+        const response = await axios.get('http://localhost/raj-express/backend/controller/adminController/orderController/orderDetailsController.php',{
+          headers:{
+            'Authorization': token
           }
-          console.error('Error config:', error.config);
-        } else {
-          console.error('Non-Axios error:', error);
-        }
-        alert('Failed to fetch order details. Please check the console for more information.');
+        });
+        
+        orders.value = response.data.orderDetails;
+      } catch (error) {
+        console.log('Error in ' + error);
+      }
+    };
+
+    const fetchProduct = async () => {
+      try {
+        const token = route.params.id;
+
+        const response = await axios.get('http://localhost/raj-express/backend/controller/adminController/orderController/orderDetailsProductController.php',{
+          headers:{
+            'Authorization': token
+          }
+        });
+        
+        products.value = response.data.orderDetails;
+      } catch (error) {
+        console.log('Error in ' + error);
       }
     };
 
@@ -176,21 +169,25 @@ export default {
       router.push({
         name: 'pos-print-order',
         params: {
-          orderData: JSON.stringify(order.value)
+          orderData: JSON.stringify(orders.value)
         }
       });
     };
 
     onMounted(() => {
       fetchOrderDetails();
+      fetchProduct();
     });
 
     return {
-      order,
-      productColumns,
+      orders,
+      addsOns,
       formatCurrency,
       formatDate,
+      fetchProduct,
       goBack,
+      products,
+      productsON,
       printOrder
     };
   }

@@ -37,7 +37,7 @@ const routes = [
       path: '/orders',
       component: () => import('layouts/AdminLayout.vue'),
       children: [
-        { path: 'all', component: () => import('pages/admin/All_Orders.vue') }, // NewSale route
+        { path: 'all', component: () => import('pages/admin/All_Orders.vue') },
         { path: 'pending', component: () => import('pages/admin/Pending_Orders.vue') },
         { path: 'confirm', component: () => import('pages/admin/Confirm_Orders.vue') },
         { path: 'processing', component: () => import('pages/admin/Processing_Orders.vue') },
