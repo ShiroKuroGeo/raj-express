@@ -22,29 +22,7 @@
           <div class="col-grow">
             <h6 class="q-my-none text-capitalize">Status List <q-badge color="primary" rounded>{{ status }}</q-badge></h6>
           </div>
-          <!-- <div class="col-auto">
-            <q-input v-model="searchOrderId" dense outlined placeholder="Search by order ID">
-              <template v-slot:append>
-                <q-btn color="primary" label="Search" @click="searchOrder" />
-              </template>
-            </q-input>
-          </div> -->
         </div>
-
-        <!-- <q-table
-          :rows="orders"
-          :columns="orderColumns"
-          row-key="id"
-          flat
-          bordered
-        >
-          <template v-slot:body-cell-action="props">
-            <q-td :props="props">
-              <q-btn flat round color="primary" icon="visibility" @click="viewOrder(props.row.id)" />
-              <q-btn flat round color="primary" icon="receipt_long" @click="viewInvoice(props.row.id)" />
-            </q-td>
-          </template>
-        </q-table> -->
       </div>
 
       <div class="col-12 col-md-4">

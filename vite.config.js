@@ -36,7 +36,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost/AMBOT-KAPOYA-NA/raj-express/backend/controller',
+        target: 'http://localhost/raj-express/backend/controller',
         changeOrigin: true,
         pathRewrite: {
           '^/api': ''

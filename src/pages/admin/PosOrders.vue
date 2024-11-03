@@ -119,7 +119,7 @@ export default {
 
     const fetchRecentOrders = async () => {
       try {
-        const response = await axios.get('http://localhost/AMBOT-KAPOYA-NA/raj-express/backend/controller/posnewsale.php?action=get_recent_orders');
+        const response = await axios.get('http://localhost/raj-express/backend/controller/posnewsale.php?action=get_recent_orders');
         if (response.data && response.data.success) {
           recentOrders.value = response.data.orders;
           pagination.value.rowsNumber = recentOrders.value.length;

@@ -62,7 +62,7 @@ export default {
     const fetchOrderDetails = async () => {
       try {
         const orderNumber = route.params.id;
-        const response = await axios.get('http://localhost/AMBOT-KAPOYA-NA/raj-express/backend/controller/pos_printorders.php', {
+        const response = await axios.get('http://localhost/raj-express/backend/controller/pos_printorders.php', {
           params: {
             action: 'get_order_details',
             order_number: orderNumber

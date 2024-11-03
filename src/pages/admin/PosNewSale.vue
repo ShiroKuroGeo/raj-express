@@ -1,31 +1,16 @@
 <template>
   <q-page class="q-pa-md">
     <div class="row q-col-gutter-md">
-      <!-- Product Section -->
-      <div class="col-8">
-        <q-card class="q-pa-md">
+      <div class="col col-12">
+        <q-card class="pt-0">
           <q-card-section>
-            <h6>Product Section</h6>
+            <span class="mt-1 pt-1" style="font-size: 20px; font-weight: bold">Product Section</span>
             <div class="row q-col-gutter-md q-mb-md">
-              <div class="col-6">
-                <q-select
-                  v-model="selectedCategory"
-                  :options="categories"
-                  label="All Categories"
-                  dense
-                  @update:model-value="filterProducts"
-                />
+              <div class="col-12">
+                <q-select v-model="selectedCategory" :options="categories" label="All Categories" dense @update:model-value="filterProducts" />
               </div>
-              <div class="col-6">
-                <q-input
-                  v-model="searchQuery"
-                  dense
-                  placeholder="Search here"
-                  outlined
-                  clearable
-                  debounce="300"
-                  @update:model-value="filterProducts"
-                >
+              <div class="col-12">
+                <q-input v-model="searchQuery" dense placeholder="Search here" outlined clearable debounce="300" @update:model-value="filterProducts" >
                   <template v-slot:append>
                     <q-icon name="search" />
                   </template>
@@ -33,23 +18,10 @@
               </div>
             </div>
 
-            <!-- Product Grid -->
             <div class="row q-col-gutter-md">
-              <div
-                v-for="product in filteredProducts"
-                :key="product.id"
-                class="col-4 q-mb-md"
-              >
-                <q-card
-                  @click="addToOrder(product)"
-                  class="product-card q-hoverable q-pa-sm"
-                  :class="{ 'unavailable': !product.available }"
-                >
-                  <q-img
-                    :src="product.image"
-                    :alt="product.name"
-                    style="height: 150px; object-fit: cover;"
-                  >
+              <div v-for="product in filteredProducts" :key="product.id" class="col-12 q-mb-md" >
+                <q-card @click="addToOrder(product)" class="product-card q-hoverable q-pa-sm" :class="{ 'unavailable': !product.available }" >
+                  <q-img :src="product.image" :alt="product.name" style="height: 150px; object-fit: cover;" >
                     <template v-slot:error>
                       <div class="absolute-full flex flex-center bg-negative text-white">
                         Image not available
@@ -70,8 +42,7 @@
         </q-card>
       </div>
 
-      <!-- Order Summary -->
-      <div class="col-4">
+      <div class="col col-12">
         <q-card>
           <q-card-section class="row items-center justify-between">
             <div class="text-h6">Order</div>
@@ -79,43 +50,20 @@
           </q-card-section>
 
           <q-card-section>
-            <q-table
-              :rows="order"
-              :columns="columns"
-              row-key="id"
-              hide-pagination
-              :pagination="{ rowsPerPage: 0 }"
-              flat
-              bordered
-            >
+            <q-table :rows="order" :columns="columns" row-key="id" hide-pagination :pagination="{ rowsPerPage: 0 }" flat bordered >
               <template v-slot:body="props">
                 <q-tr :props="props">
                   <q-td key="name" :props="props">
                     {{ props.row.name }}
                   </q-td>
                   <q-td key="qty" :props="props">
-                    <q-input
-                      v-model.number="props.row.qty"
-                      type="number"
-                      dense
-                      outlined
-                      min="1"
-                      style="width: 60px"
-                      @update:model-value="updateOrder(props.row)"
-                    />
+                    <q-input v-model.number="props.row.qty" type="number" dense outlined min="1" style="width: 60px" @update:model-value="updateOrder(props.row)" />
                   </q-td>
                   <q-td key="price" :props="props">
                     ₱{{ formatPrice(props.row.price * props.row.qty) }}
                   </q-td>
                   <q-td key="actions" :props="props">
-                    <q-btn
-                      flat
-                      round
-                      color="negative"
-                      icon="close"
-                      size="sm"
-                      @click="removeItem(props.rowIndex)"
-                    />
+                    <q-btn flat round color="negative" icon="close" size="sm" @click="removeItem(props.rowIndex)" />
                   </q-td>
                 </q-tr>
               </template>
@@ -136,32 +84,13 @@
           <q-card-section>
             <div class="q-mb-md">
               <div class="text-subtitle2">Payment Method:</div>
-              <q-btn-toggle
-                v-model="paymentMethod"
-                :options="[
-                  {label: 'Cash', value: 'cash'},
-                  {label: 'G-Cash', value: 'gcash'}
-                ]"
-                color="red"
-                toggle-color="green"
-              />
+              <q-btn-toggle v-model="paymentMethod" :options="[   {label: 'Cash', value: 'cash'},   {label: 'G-Cash', value: 'gcash'} ]" color="grey" toggle-color="green" />
             </div>
           </q-card-section>
 
           <q-card-actions align="right">
-            <q-btn
-              color="red"
-              label="Cancel Order"
-              @click="cancelOrder"
-              :disable="order.length === 0"
-              class="q-mr-sm"
-            />
-            <q-btn
-              color="green"
-              label="Place Order"
-              @click="placeOrder"
-              :disable="order.length === 0"
-            />
+            <q-btn color="red" label="Cancel Order" @click="cancelOrder" :disable="order.length === 0" class="q-mr-sm" />
+            <q-btn color="green" label="Place Order" @click="placeOrder" :disable="order.length === 0" />
           </q-card-actions>
         </q-card>
       </div>
@@ -223,7 +152,7 @@ export default {
 
     const fetchProducts = async () => {
       try {
-        const response = await axios.get("http://localhost/AMBOT-KAPOYA-NA/raj-express/backend/controller/posnewsale.php");
+        const response = await axios.get("http://localhost/raj-express/backend/controller/posnewsale.php");
         console.log("Response from backend:", response.data);
         products.value = response.data.products || [];
         filteredProducts.value = products.value;
@@ -298,22 +227,21 @@ export default {
 
       try {
         console.log('Sending order data:', orderData);
-        const response = await axios.post('http://localhost/AMBOT-KAPOYA-NA/raj-express/backend/controller/posnewsale.php', orderData);
+        const response = await axios.post('http://localhost/raj-express/backend/controller/posnewsale.php', orderData);
         console.log('Response from backend:', response.data);
         if (response.data && response.data.success) {
           console.log('Order placed successfully!');
-          alert('Order placed successfully!'); // Changed from $q.notify to alert
+          alert('Order placed successfully!');
           newOrder();
         } else {
           throw new Error(response.data.message || 'Failed to place order');
         }
       } catch (error) {
         console.error('Error placing order:', error);
-        alert('Failed to place order. Please try again.'); // Changed from $q.notify to alert
+        alert('Failed to place order. Please try again.');
       }
     };
 
-    // Add this function to generate a unique order number
     const generateOrderNumber = () => {
       const prefix = 'ORD';
       const timestamp = Date.now().toString();

@@ -15,32 +15,9 @@
 
       <q-card-section class="q-mt-md">
         <div class="row q-col-gutter-md items-center">
-          <q-select
-            v-model="filter"
-            :options="filterOptions"
-            label="Filter"
-            outlined
-            dense
-            class="col"
-          />
-          <q-input
-            v-model="startDate"
-            mask="####-##-##"
-            label="Start Date"
-            outlined
-            dense
-            type="date"
-            class="col"
-          />
-          <q-input
-            v-model="endDate"
-            mask="####-##-##"
-            label="End Date"
-            outlined
-            dense
-            type="date"
-            class="col"
-          />
+          <q-select v-model="filter" :options="filterOptions" label="Filter" outlined dense class="col" />
+          <q-input v-model="startDate" mask="####-##-##" label="Start Date" outlined dense type="date" class="col" />
+          <q-input v-model="endDate" mask="####-##-##" label="End Date" outlined dense type="date" class="col" />
           <q-btn color="orange" label="Show" @click="fetchReports" class="col-auto" />
         </div>
       </q-card-section>
@@ -57,14 +34,7 @@
         </div>
       </q-card-section>
 
-      <q-table
-        :rows="rows"
-        :columns="columns"
-        row-key="id"
-        class="q-mt-md"
-        flat
-        bordered
-      >
+      <q-table :rows="rows" :columns="columns" row-key="id" class="q-mt-md" flat bordered >
         <template v-slot:top-right>
           <q-input round dense debounce="300" v-model="search" placeholder="Search" />
         </template>
@@ -112,7 +82,7 @@ export default {
     }
 
     const goToDashboard = () => {
-      // Implement navigation to dashboard
+      
     }
 
     return {

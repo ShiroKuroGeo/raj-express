@@ -279,8 +279,8 @@ export default {
     async fetchProducts() {
       try {
         const [productsResponse, categoriesResponse] = await Promise.all([
-          axios.get('http://localhost/AMBOT-KAPOYA-NA/raj-express/backend/controller/pos_product.php'),
-          axios.get('http://localhost/AMBOT-KAPOYA-NA/raj-express/backend/controller/pos_categories.php')
+          axios.get('http://localhost/raj-express/backend/controller/pos_product.php'),
+          axios.get('http://localhost/raj-express/backend/controller/pos_categories.php')
         ]);
 
         console.log('Raw products data:', productsResponse.data);
@@ -338,7 +338,7 @@ export default {
       }
 
       try {
-        const response = await axios.post('http://localhost/AMBOT-KAPOYA-NA/raj-express/backend/controller/pos_product.php', formData, {
+        const response = await axios.post('http://localhost/raj-express/backend/controller/pos_product.php', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
@@ -429,7 +429,7 @@ export default {
       if (!this.productToDelete) return;
 
       try {
-        const response = await axios.post('http://localhost/AMBOT-KAPOYA-NA/raj-express/backend/controller/pos_product.php', {
+        const response = await axios.post('http://localhost/raj-express/backend/controller/pos_product.php', {
           action: 'delete',
           product_id: this.productToDelete.product_id
         });

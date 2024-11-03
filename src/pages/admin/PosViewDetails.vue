@@ -119,7 +119,7 @@ export default {
         const orderNumber = decodeURIComponent(route.params.id);
         console.log('Fetching order details for order number:', orderNumber);
 
-        const url = 'http://localhost/AMBOT-KAPOYA-NA/raj-express/backend/controller/pos_viewdetails.php';
+        const url = 'http://localhost/raj-express/backend/controller/pos_viewdetails.php';
         const params = {
           action: 'get_order_details',
           order_number: orderNumber

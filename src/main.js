@@ -11,7 +11,7 @@ import store from './stores'; // Import the Vuex store
 import { Quasar } from 'quasar';
 import axios from 'axios';
 
-axios.defaults.baseURL = 'http://localhost/AMBOT-KAPOYA-NA/raj-express/backend/controller';
+axios.defaults.baseURL = 'http://localhost/raj-express/backend/controller';
 axios.defaults.withCredentials = true;
 
 const app = createApp(App);

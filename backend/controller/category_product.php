@@ -47,7 +47,7 @@ try {
             // Fetch all products if no category filter is provided
             $stmt = $pdo->query("
                 SELECT p.product_id, p.category_id, p.product_name, p.product_description, p.product_price,
-                       p.product_status, CONCAT('http://localhost/AMBOT-KAPOYA-NA/raj-express/backend/uploads/', p.product_image) as product_image, c.category_name as category
+                       p.product_status, CONCAT('http://localhost/raj-express/backend/uploads/', p.product_image) as product_image, c.category_name as category
                 FROM products p
                 JOIN categories c ON p.category_id = c.category_id
             ");

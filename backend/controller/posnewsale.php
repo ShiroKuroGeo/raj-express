@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     } else {
         // Existing code to fetch products
         $query = "SELECT p.product_id as id, p.category_id, p.product_name as name, p.product_description, p.product_price as price,
-                       p.product_status as available, CONCAT('http://localhost/AMBOT-KAPOYA-NA/raj-express/backend/uploads/', p.product_image) as image, c.category_name as category
+                       p.product_status as available, CONCAT('http://localhost/raj-express/backend/uploads/', p.product_image) as image, c.category_name as category
                 FROM products p
                 JOIN categories c ON p.category_id = c.category_id";
 

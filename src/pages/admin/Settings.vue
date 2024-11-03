@@ -126,7 +126,7 @@ export default {
   methods: {
     async fetchProfile() {
       try {
-        const response = await axios.get('http://localhost/AMBOT-KAPOYA-NA/raj-express/backend/controller/profile.php');
+        const response = await axios.get('http://localhost/raj-express/backend/controller/profile.php');
         console.log('Profile response:', response.data);
         if (response.data && !response.data.error) {
           this.profile = response.data;
@@ -163,7 +163,7 @@ export default {
           formData.append('image', this.profileImage);
         }
 
-        const response = await axios.post('http://localhost/AMBOT-KAPOYA-NA/raj-express/backend/controller/update-profile.php', formData, {
+        const response = await axios.post('http://localhost/raj-express/backend/controller/update-profile.php', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }

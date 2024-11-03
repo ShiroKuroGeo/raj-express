@@ -113,7 +113,7 @@ export default {
     // Fetch categories from the backend
     async fetchCategories() {
       try {
-        const response = await axios.get('http://localhost/AMBOT-KAPOYA-NA/raj-express/backend/controller/pos_categories.php');
+        const response = await axios.get('http://localhost/raj-express/backend/controller/pos_categories.php');
         console.log('API response:', response.data); // Log the entire response
         if (response.data && Array.isArray(response.data.categories)) {
           this.categoryOptions = response.data.categories.map(category => ({
@@ -172,7 +172,7 @@ export default {
         console.log(key, value);
       }
 
-      const url = 'http://localhost/AMBOT-KAPOYA-NA/raj-express/backend/controller/pos_product.php';
+      const url = 'http://localhost/raj-express/backend/controller/pos_product.php';
 
       try {
         const response = await axios.post(url, formData, {

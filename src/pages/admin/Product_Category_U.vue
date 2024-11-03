@@ -89,7 +89,7 @@
 import axios from 'axios';
 
 // Configure axios baseURL if not already done globally
-axios.defaults.baseURL = 'http://localhost/AMBOT-KAPOYA-NA/raj-express/backend/controller/';
+axios.defaults.baseURL = 'http://localhost/raj-express/backend/controller/';
 
 export default {
   data() {
@@ -189,7 +189,7 @@ export default {
 
     async deleteCategory(category_id) {
       try {
-        const response = await axios.delete('http://localhost/AMBOT-KAPOYA-NA/raj-express/backend/controller/pos_categories.php', {
+        const response = await axios.delete('http://localhost/raj-express/backend/controller/pos_categories.php', {
           data: { category_id }
         });
 
