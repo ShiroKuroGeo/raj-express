@@ -22,19 +22,14 @@ try {
     $cartStmt->execute();
 
     if ($cartStmt->rowCount() > 0) {
-        // If naay siyay cart daan ingun ani unya nakapending, kani sya ang mo gawas
         $set->sendJsonResponse(["success" => "Product already in your cart!"], 200);
     }else{
-        // If wala or dili na pending, mo add siya as pending bago kong mo order siya balik
-        $addOnsDataJson = json_encode($data['addOnsData']);
     
-        $query = "INSERT INTO `carts` (`product_id`, `user_id`, `quantity`, `addOns`, `addOnsData`, `status`) VALUES (:product_id, :user_id, :quantity, :addOns, :addOnsData, :status)";
+        $query = "INSERT INTO `carts` (`product_id`, `user_id`, `quantity`, `status`) VALUES (:product_id, :user_id, :quantity, :status)";
         $stmt = $db->prepare($query);
         $stmt->bindParam(":product_id", $data['product_id']);
         $stmt->bindParam(":user_id", $data['user_id']);
         $stmt->bindParam(":quantity", $data['quantity']);
-        $stmt->bindParam(":addOns", $data['addOns']);
-        $stmt->bindParam(":addOnsData", $addOnsDataJson);
         $stmt->bindParam(":status", $pendingStatus);
     
         if ($stmt->execute()) {

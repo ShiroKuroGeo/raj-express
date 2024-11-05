@@ -15,9 +15,7 @@
           <div v-if="!addresses" class="text-red q-mt-sm">No info added</div>
           <div v-else>
             <div v-for="(a, index) in addresses" :key="a.address_id" class="text-capitalize">
-              <!-- {{ a }} -->
               <div class="input-group">
-                <!-- I enchange ni ang design kong mahimo  -->
                 <input type="checkbox" @change="selectedIdForAddress(a.address_id)" v-model="isChecked"
                   :value="a.address_id"> {{ 1 + index++ }}. {{ a.deliveryAddress }}, {{ a.streetNumber }}, {{ a.landmark
                 }}
@@ -26,6 +24,27 @@
           </div>
         </q-card-section>
       </q-card>
+      
+      <q-card-section>
+        <div class="text-subtitle2">Add ons</div>
+        <q-list>
+            <q-item v-for="(addon, key) in addons" :key="addon.id">
+                <q-item-section avatar>
+                    <q-checkbox v-model="addon.selected" />
+                </q-item-section>
+                <q-item-section>{{ addon.ao_name }}</q-item-section>
+                <q-item-section side>₱ {{ addon.ao_price }}</q-item-section>
+                <q-item-section side>
+                    <q-btn-group flat>
+                        <q-btn flat round icon="remove" @click="changeQuantity(key, -1)" :disable="!addon.selected || addon.quantity === 0" />
+                        <q-btn flat disable>{{ addon.quantity }}</q-btn>
+                        <q-btn flat round icon="add" @click="changeQuantity(key, 1)" :disable="!addon.selected" />
+                    </q-btn-group>
+                </q-item-section>
+            </q-item>
+        </q-list>
+      </q-card-section>
+
 
       <q-card v-for="item in cartItems" :key="item.cart_id" flat bordered class="order-summary q-mt-md">
         <q-card-section horizontal>
@@ -49,9 +68,13 @@
 
       <div class="payment-details q-mt-lg">
         <div class="text-subtitle1 q-mb-sm">Payment Details:</div>
-        <div v-for="item in cartItems" :key="item.id" class="row justify-between">
-          <span>₱</span>
-          <span>{{ parseInt(item.addOns) + parseInt(item.product_price * item.quantity) }}</span>
+        <div class="between">
+          <small>Adds On Total</small>
+          <span class="float-end">₱ {{ totalAddsOn.toFixed(2) }}</span>
+        </div>
+        <div class="between">
+          <small>Product Total</small>
+          <span class="float-end">₱ {{ totalProduct.toFixed(2) }}</span>
         </div>
       </div>
 
@@ -81,6 +104,7 @@ export default {
       paymentOptions: [{ label: 'Cash on Delivery', value: 'cash' }, { label: 'G-Cash', value: 'gcash' }],
       cartItems: [],
       addresses: [],
+      addons: [],
       selectedAddress: 0,
       isChecked: false,
     }
@@ -132,15 +156,33 @@ export default {
           let orderData = [];
 
           this.cartItems.forEach(item => {
+            const productTotal = parseFloat(item.product_price) * parseInt(item.quantity);
+
+            const addonsTotal = this.addons
+                .filter(addon => addon.selected)
+                .reduce((total, addon) => {
+                    return total + (parseFloat(addon.ao_price) * (addon.quantity || 1)); 
+                }, 0);
+
+            const paymentTotal = (productTotal + addonsTotal).toFixed(2);
+
+            let selectedAddons = this.addons
+              .filter(addon => addon.selected)
+              .map(addon => ({
+                  name: addon.ao_name,
+                  price: parseFloat(addon.ao_price), 
+                  quantity: addon.quantity
+              }));
+
             orderData.push({
               user_id: token,
               cart_id: item.cart_id,
               product_id: item.product_id,
               address_id: this.selectedAddress,
               order_qty: item.quantity,
-              extra: item.addOnsData,
+              extra: selectedAddons.length > 0 ? selectedAddons : null,
               payment_method: this.paymentMethod,
-              payment_total: parseInt(item.addOns) + parseInt(item.product_price * item.quantity),
+              payment_total: paymentTotal,
               payment_status: this.paymentMethod === 'cash' ? 'pending' : 'pending on gcash',
             });
           });
@@ -162,10 +204,6 @@ export default {
 
           if (result && result.success) {
             alert('Order Created!');
-            // $q.notify({
-            //   color: 'positive',
-            //   message: result.success,
-            // });
           } else {
             throw new Error(result.error || "Failed to add product to cart");
           }
@@ -181,22 +219,70 @@ export default {
     },
     addAddress() {
       this.$router.push('/address');
+    },
+    async fetchAddsOn(){
+      try {
+        const response = await axios.get('http://localhost/raj-express/backend/controller/addOnController/get.php');
+        const data = response.data;
+
+        console.log(data);
+
+        this.addons = data.addOnsItems.map(item => ({
+          ...item,
+          selected: false, 
+          quantity: 1
+        }));
+
+      } catch (error) {
+        console.error('Error fetching specials:', error);
+      }
+    },
+    changeQuantity(index, delta) {
+        const addon = this.addons[index];
+        
+        if (addon.selected) {
+            addon.quantity = Math.max(0, addon.quantity + delta);
+        }
     }
   },
   computed: {
     totalPrice() {
       return this.cartItems.reduce((total, item) => {
         const productTotal = parseInt(item.product_price) * parseInt(item.quantity);
-
-        const addOnsTotal = parseInt(item.addOns) || 0;
-
+        
+        const addOnsTotal = this.addons.reduce((sum, addon) => {
+            if (addon.selected) {
+                return sum + (parseInt(addon.ao_price) * addon.quantity);
+            }
+            return sum;
+        }, 0);
+        
         return total + productTotal + addOnsTotal;
-      }, 0);
+      },0)
     },
+    
+    totalProduct(){
+      return this.cartItems.reduce((total, item) => {
+        const productTotal = parseInt(item.product_price) * parseInt(item.quantity);
+        
+        return total + productTotal;
+      },0)
+    },
+
+    totalAddsOn(){
+      const addOnsTotal = this.addons.reduce((sum, addon) => {
+          if (addon.selected) {
+              return sum + (parseInt(addon.ao_price) * addon.quantity);
+          }
+          return sum;
+      }, 0);
+      return addOnsTotal;
+    }
   },
   created() {
     this.fetchAddresses();
     this.fetchCartItems();
+    this.fetchAddsOn();
   }
 
 }
@@ -217,4 +303,23 @@ export default {
 .order-summary {
   background-color: #fff;
 }
+
+.between {
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-top: 8px; 
+}
+
+.between small {
+    font-size: 1rem;
+    color: #333; 
+}
+
+.between span {
+    font-size: 1rem; 
+    font-weight: bold; 
+    color: #2c3e50;
+}
+
 </style>

@@ -15,7 +15,7 @@ include "../../connection/dbconfig.php";
 try {
     $database = new Database();
     $db = $database->getDb();
-    $query = "SELECT cart.cart_id, cart.addOns, cart.product_id, cart.addOnsData, cart.addOns, cart.user_id, cart.quantity, cart.status, cart.created_at, cart.updated_at, CONCAT(user.first_name, ' ', user.last_name) AS fullname, user.contact_number, user.email, product.product_name, product.product_price, product.product_image FROM `carts` as cart INNER JOIN `users` as user INNER JOIN `products` as product ON cart.user_id = user.user_id and cart.product_id = product.product_id WHERE cart.user_id = :user_id AND cart.status = 'pending'";
+    $query = "SELECT cart.cart_id, cart.product_id, cart.user_id, cart.quantity, cart.status, cart.created_at, cart.updated_at, CONCAT(user.first_name, ' ', user.last_name) AS fullname, user.contact_number, user.email, product.product_name, product.product_price, product.product_image FROM `carts` as cart INNER JOIN `users` as user INNER JOIN `products` as product ON cart.user_id = user.user_id and cart.product_id = product.product_id WHERE cart.user_id = :user_id AND cart.status = 'pending'";
     $stmt = $db->prepare($query);
     $stmt->bindParam(":user_id", $authHeader);
     $stmt->execute();

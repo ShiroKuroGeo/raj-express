@@ -30,27 +30,6 @@
       </q-card-section>
 
       <q-card-section>
-        <div class="text-subtitle2">Add ons</div>
-        <q-list>
-          <q-item v-for="(addon, key) in addons" :key="addon.id">
-            <q-item-section avatar>
-              <q-checkbox v-model="addon.selected" />
-            </q-item-section>
-            <q-item-section>{{ addon.ao_name }}</q-item-section>
-            <q-item-section side>₱ {{ addon.ao_price }}</q-item-section>
-            <q-item-section side>
-              <q-btn-group flat>
-                <q-btn flat round icon="remove" @click="changeQuantity(key, -1)" :disable="!addon.selected || addon.quantity === 0" />
-                <q-btn flat disable>{{ addon.quantity }}</q-btn>
-                <q-btn flat round icon="add" @click="changeQuantity(key, 1)" :disable="!addon.selected" />
-              </q-btn-group>
-            </q-item-section>
-          </q-item>
-        </q-list>
-
-      </q-card-section>
-
-      <q-card-section>
         <div class="text-subtitle1">Total: ₱ {{ totalPrice }}</div>
       </q-card-section>
 
@@ -80,8 +59,6 @@ export default {
     const quantity = ref(1)
     const route = useRoute()
     const product = ref([])
-    
-    const addons = ref([]);
 
     // const addons = ref({
     //   Rice: { id: 1, price: 10, quantity: 1, selected: false },
@@ -119,32 +96,7 @@ export default {
 
     }
 
-    const fetchAddOns = async () => {
-
-      try {
-        const response = await axios.get('http://localhost/raj-express/backend/controller/addOnController/get.php');
-        const data = response.data;
-
-        console.log(data);
-
-        addons.value = data.addOnsItems.map(item => ({
-          ...item,
-          selected: false, 
-          quantity: 1
-        }));
-
-      } catch (error) {
-        console.error('Error fetching specials:', error);
-      }
-
-    }
-
-    const changeQuantity = (index, change) => {
-      const addon = addons.value[index];
-      if (addon.selected) {
-        addon.quantity = Math.max(0, addon.quantity + change);
-      }
-    };
+    
 
     const updateQuantity = (change) => {
       quantity.value = Math.max(1, quantity.value + change);
@@ -154,24 +106,10 @@ export default {
     const totalPrice = computed(() => {
       let total = parseFloat(product.value.price) * quantity.value;
 
-      for (const [item, data] of Object.entries(addons.value)) {
-        if (data.selected) {
-          total += parseFloat(data.ao_price) * quantity.value;
-        }
-      }
-
       return total;
     })
 
-    const totalAddOns = computed(() => {
-      let total = 0;
-      for (const [item, data] of Object.entries(addons.value)) {
-        if (data.selected) {
-          total += data.ao_price * data.quantity;
-        }
-      }
-      return total;
-    });
+    
 
     const addToWishlist = async () => {
       try {
@@ -221,14 +159,6 @@ export default {
           product_id: route.params.id,
           user_id: token,
           quantity: quantity.value,
-          addOns: totalAddOns.value,
-          addOnsData: addons.value
-            .filter(addon => addon.selected) 
-            .map(addon => ({
-              name: addon.ao_name, 
-              price: addon.ao_price,
-              quantity: addon.quantity
-            })),
           pending: 'pending'
         };
 
@@ -267,18 +197,13 @@ export default {
     }
 
     onMounted(fetchProduct)
-    onMounted(fetchAddOns)
 
     return {
       product,
-      addons,
-      changeQuantity,
       addToCart,
       quantity,
-      fetchAddOns,
       totalPrice,
       addToWishlist,
-      totalAddOns,
       updateQuantity,
       addToCart,
       goBack

@@ -7,29 +7,65 @@ $db = $database->getDb();
 $set->setCorsOrigin();
 $data = $set->setInputData();
 $headers = apache_request_headers();
-// $authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : '';
 $authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : 8;
 
 try {
-    
-    $query = "SELECT ord.order_id, ord.order_qty as qty, ord.extra, ord.status, ord.created_at, prod.product_name, prod.product_image, address.personName as addressContactPerson, address.phoneNumber as addressContactNumber, address.deliveryAddress, address.streetNumber, address.landmark, pay.payment_method, pay.payment_total, pay.payment_status FROM `orders` as ord INNER JOIN `products` as prod INNER JOIN `addresses` as address INNER JOIN `payments` as pay INNER JOIN `users` as us ON ord.user_id = us.user_id AND ord.product_id = prod.product_id AND ord.address_id = address.address_id AND ord.payment_id = pay.payment_id WHERE ord.order_id = :order_id;";
+    $query = "SELECT 
+    ord.customer_reference AS cusref, 
+    COUNT(ord.order_id) AS total_orders,
+    GROUP_CONCAT(prod.product_name SEPARATOR ', ') AS product_names,
+    ord.extra, 
+    ord.status, 
+    MIN(ord.created_at) AS first_order_date, 
+    address.personName AS addressContactPerson, 
+    address.phoneNumber AS addressContactNumber, 
+    address.deliveryAddress, 
+    address.latitude, 
+    address.longitude, 
+    address.streetNumber, 
+    address.landmark, 
+    pay.payment_method, 
+    SUM(pay.payment_total) AS total_payment, 
+    pay.payment_status 
+FROM `orders` AS ord 
+INNER JOIN `products` AS prod ON ord.product_id = prod.product_id 
+INNER JOIN `addresses` AS address ON ord.address_id = address.address_id 
+INNER JOIN `payments` AS pay ON ord.payment_id = pay.payment_id 
+INNER JOIN `users` AS us ON ord.user_id = us.user_id 
+WHERE ord.customer_reference = :order_id 
+GROUP BY ord.customer_reference;";
+
     $stmt = $db->prepare($query);
     $stmt->bindParam(':order_id', $authHeader);
     $stmt->execute();
 
     if ($stmt->rowCount() > 0) {
-        $orderDetails = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-        foreach ($orderDetails as &$order) {
-            $order['extra'] = json_decode($order['extra'], true);
-        }
-    
+        $orderDetails = $stmt->fetch(PDO::FETCH_ASSOC);
         $set->sendJsonResponse([
             "success" => true,
-            "orderDetails" => $orderDetails,
+            'cusref' => $orderDetails['cusref'],
+            'total_orders' => $orderDetails['total_orders'],
+            'product_names' => $orderDetails['product_names'],
+            'extra' => $orderDetails['extra'],
+            'status' => $orderDetails['status'],
+            'first_order_date' => $orderDetails['first_order_date'],
+            'addressContactPerson' => $orderDetails['addressContactPerson'],
+            'addressContactNumber' => $orderDetails['addressContactNumber'],
+            'deliveryAddress' => $orderDetails['deliveryAddress'],
+            'streetNumber' => $orderDetails['streetNumber'],
+            'landmark' => $orderDetails['landmark'],
+            'payment_method' => $orderDetails['payment_method'],
+            'total_payment' => $orderDetails['total_payment'],
+            'payment_status' => $orderDetails['payment_status'],
+            'latitude' => $orderDetails['latitude'],
+            'longitude' => $orderDetails['longitude'],
         ]);
+
     } else {
-        $set->sendJsonResponse(["error" => "Order Details not found"], 404);
+        $set->sendJsonResponse([
+            "success" => false,
+            "message" => "No orders found for the provided reference.",
+        ]);
     }
 
 } catch (PDOException $e) {

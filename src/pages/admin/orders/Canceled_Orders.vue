@@ -11,10 +11,10 @@
 
       <template v-slot:body-cell-actions="props">
         <q-td :props="props" class="q-gutter-sm">
-          <q-btn color="primary" icon="visibility" size="sm" flat dense @click="viewOrder(props.row.order_id)" >
+          <q-btn color="primary" icon="visibility" size="sm" flat dense @click="viewOrder(props.row.cusref)" >
             <q-tooltip>View Order</q-tooltip>
           </q-btn>
-          <q-btn color="secondary" icon="print" size="sm" flat dense @click="printOrder(props.row.order_id)" >
+          <q-btn color="secondary" icon="print" size="sm" flat dense @click="printOrder(props.row.cusref)" >
             <q-tooltip>Print Order</q-tooltip>
           </q-btn>
         </q-td>
@@ -34,14 +34,11 @@ export default {
     const loading = ref(false);
     const search = ref('');
     const router = useRouter();
-// { name: "user_id", label: "User ID", align: "left", field: (row) => row.user_id},
+    
     const columns = ref([
-      { name: 'id', required: true, label: 'Order ID', align: 'left', field: (row) => row.order_id, sortable: true },
-      { name: 'delivery_date', align: 'left', label: 'Product', field: (row) => row.product_name, sortable: true },
+      { name: 'id', required: true, label: 'Order ID', align: 'left', field: (row) => row.cusref, sortable: true },
       { name: 'customer_info', label: 'Customer Info', field: (row) => row.addressContactPerson },
-      { name: 'total_amount', label: 'Total Amount', field: (row) => row.payment_total, sortable: true },
       { name: 'order_status', label: 'Order Status', field: (row) => row.status },
-      { name: 'order_status', label: 'Payment Status', field: (row) => row.payment_status },
       { name: 'actions', label: 'Actions', field: 'actions', align: 'center' }
     ]);
 
@@ -49,7 +46,10 @@ export default {
       loading.value = true;
       try {
         const response = await axios.get('http://localhost/raj-express/backend/controller/adminController/orderController/allOrderController.php');
-        orders.value = response.data.orders;
+        const statuses = response.data.orders.map(order => order.status);
+        if(statuses == 'cancelled'){
+          orders.value = response.data.orders;
+        }
       } catch (error) {
         console.error('Failed to fetch orders:' + error);
       } finally {
