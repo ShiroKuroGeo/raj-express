@@ -21,7 +21,9 @@
                 <q-item-section>
                   <q-item-label>Order #{{ order.id }}</q-item-label>
                   <q-item-label caption>Amount: {{ order.payment_total }}</q-item-label>
+                  <q-item-label caption>Status: {{ order.payment_status }}</q-item-label>
                 </q-item-section>
+                <q-btn color="red" class="q-mt-md" @click="set">Rate</q-btn>
               </q-item>
             </q-list>
           </div>
@@ -112,6 +114,9 @@ export default {
     },
     goToHome (){
       this.$router.push('/home');
+    },
+    viewOrderDetails(id) {
+      this.$router.push({ name: 'order-details', params: { id } });
     }
   },
   created() {

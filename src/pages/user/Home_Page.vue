@@ -1,4 +1,3 @@
-//Sir pwede ko paa add ratings sa product below sa product name.
 <template>
   <q-layout>
     <div v-if="isLoading">Loading...</div>
@@ -12,12 +11,21 @@
             No products available in this category.
           </div>
           <div v-else class="row q-col-gutter-md">
-            <div v-for="product in getProductsByCategory(category.category_id)" :key="product.product_id" class="col-xs-6 col-sm-4 col-md-3">
+            <div v-for="product in getProductsByCategory(category.category_id)" :key="product.product_id"
+              class="col-xs-6 col-sm-4 col-md-3">
               <q-card class="product-card cursor-pointer" @click="goToProductDetails(product.product_id)">
-                <q-img :src="`http://localhost/raj-express/backend/uploads/${product.product_image}`" :ratio="1" style="height: 150px;" />
+                <q-img :src="`http://localhost/raj-express/backend/uploads/${product.product_image}`" :ratio="1"
+                  style="height: 150px;" />
                 <q-card-section>
                   <div class="text-h6">{{ product.product_name }}</div>
-                  <div class="text-h6">Ratings</div>
+                  <div class="text-h6">
+                    <div v-if="ratings.length">
+                      <small> <q-rating :value="calculateAverageRating(product.product_id)" :readonly="true" color="yellow" icon="star" size="10px" :max="5" /> ({{ calculateAverageRating(product.product_id) }})</small>
+                    </div>
+                    <div v-else>
+                      No ratings available for this product.
+                    </div>
+                  </div>
                   <div class="text-h6">{{ product.product_price }}</div>
                 </q-card-section>
               </q-card>
@@ -30,24 +38,27 @@
 </template>
 
 <script>
+import axios from 'axios'
 export default {
   data() {
     return {
       categories: [],
       products: [],
+      ratings: [], 
       isLoading: true,
-      search: 'Hello wolrd',
+      search: '',
     };
   },
   mounted() {
     this.fetchAllData();
+    this.fetchRateProduct();
   },
   methods: {
     async fetchAllData() {
       this.isLoading = true;
       try {
-        await this.fetchCategories(); 
-        await this.fetchProductsForCategories(); 
+        await this.fetchCategories();
+        await this.fetchProductsForCategories();
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -82,19 +93,36 @@ export default {
             this.products = [...this.products, ...data.products];
           }
         });
-        await Promise.all(productPromises); 
+        await Promise.all(productPromises);
       } catch (error) {
         console.error("Error fetching products by category:", error);
       }
     },
     goToProductDetails(productId) {
-      this.$router.push({ name: 'productDetails', params: { id: productId } }); 
+      this.$router.push({ name: 'productDetails', params: { id: productId } });
+    },
+    async fetchRateProduct() {
+      try {
+        const response = await axios.get('http://localhost/raj-express/backend/controller/ratingController/getRateController.php');
+        this.ratings = response.data.ratings;
+      } catch (error) {
+        console.log('Error in fetchRateProduct:', error);
+      }
+    },
+  
+    calculateAverageRating(productId) {
+      const productRatings = this.ratings.filter(rating => rating.product_id === productId);
+      
+      if (productRatings.length === 0) return 0; 
+
+      const total = productRatings.reduce((sum, rating) => sum + parseInt(rating.feedback), 0);
+      return parseInt(total / productRatings.length);
     }
   },
   computed: {
     getProductsByCategory() {
       return (categoryId) => {
-        return this.products.filter(product => parseInt(product.category_id) === parseInt(categoryId)); 
+        return this.products.filter(product => parseInt(product.category_id) === parseInt(categoryId));
       };
     }
   }
@@ -125,7 +153,6 @@ export default {
 .category-items {
   width: 95%;
   min-height: 100px;
-  /* border: 1px solid black; */
   margin-left: 20px;
   border-radius: 30px;
   padding: 20px;
@@ -139,6 +166,6 @@ export default {
 
 .product-card:hover {
   transform: scale(1.05);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 </style>

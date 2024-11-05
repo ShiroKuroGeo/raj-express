@@ -119,11 +119,10 @@ const routes = [
       { path: '/cart-not-empty', component: () => import('pages/user/Cart_NotEmpty.vue') },
       { path: '/place-order', name: 'placeOrder', component: () => import('pages/user/Place_order.vue') },
       { path: '/order', name: 'order', component: () => import('pages/user/Order_Page.vue') },
-      { path: '/order-details/:id', name: 'order-details', component: () => import('pages/user/OrderDetailsPage.vue') },
+      { path: '/order-details/:id', name: 'order-details', component: () => import('pages/user/Order_details.vue') },
       { path: '/profile', name: 'profile', component: () => import('pages/user/UpdateProfile_Page.vue') },
       { path: '/menu', name: 'menu', component: () => import('pages/user/Menu_Page.vue')},
       { path: '/my-order', component: () => import('pages/user/MyOrderPage.vue') },
-      { path: '/order-details/:id', component: () => import('pages/user/OrderDetailsPage.vue') },
       { path: '/address', component: () => import('pages/user/Address.vue') },
       { path: '/messages', component: () => import('pages/user/MessagesPage.vue') },
       { path: '/notifications', component: () => import('pages/user/NotificationsPage.vue') },
@@ -132,13 +131,10 @@ const routes = [
       { path: '/checkout', component: () => import('pages/user/CheckOut_Page.vue') },
       { path: '/rating', component: () => import('pages/user/Rating_Page.vue') },
       { path: '/notifications', component: () => import('pages/user/Notification.vue') },
+      { path: '/product-order-rating/:id',  name: 'productRating', component: () => import('pages/user/rateOrder.vue') },
 
     ]
-
-
   },
-
-
 
       // Other user routes...
 

@@ -36,6 +36,7 @@
                   icon="star"
                   readonly
                 /> -->
+                
                 <div class="q-ml-sm text-subtitle2">{{ specialItems.rating }}</div>
               </div>
               <div class="text-subtitle1 text-weight-bold">₱ {{ specialItems.product_price }}</div>
@@ -43,6 +44,16 @@
             </q-item-section>
           </q-item>
         </q-card>
+        <div class="product-rating">
+          <h5 class="text-bold">Product Ratings</h5>
+          <div v-if="ratings.length === 0" class="no-ratings">
+            No ratings available.
+          </div>
+          <strong>Rating:</strong> {{ averageRating }} <br />
+          <div v-for="(item, index) in ratings" :key="index" class="comment">
+            <strong>Comment:</strong> {{ item.fb_description }}
+          </div>
+        </div>
       </div>
     </div>
   </q-page>
@@ -68,6 +79,38 @@ export default {
       created_at : '',
       updated_at : '',
     })
+    const ratings = ref([])
+    const averageRating = ref(0)
+
+    const fetchRateProduct = async () => {
+      try {
+        const id = route.params.id;
+
+        const response = await axios.get("http://localhost/raj-express/backend/controller/ratingController/getRateControllerProductId.php", {
+          headers: {
+            "Authorization": id,
+          },
+        });
+
+        ratings.value = response.data.ratings; 
+        calculateAverageRating(); 
+      } catch (error) {
+        console.log('Error in fetchRateProduct:', error);
+      }
+    };
+
+    const calculateAverageRating = () => {
+      const id = parseInt(route.params.id);
+      const productRatings = ratings.value.filter(rating => rating.product_id === id);
+
+      console.log('Filtered Ratings:', productRatings); 
+
+      if (productRatings.length === 0) return 0; 
+
+      const total = productRatings.reduce((sum, rating) => sum + parseInt(rating.feedback), 0);
+      averageRating.value = parseInt(total / productRatings.length); 
+      console.log('Calculated Average Rating:', averageRating.value); 
+    };
 
     const addToCart = async () => {
       try {
@@ -146,13 +189,18 @@ export default {
     };
 
     onMounted(() => {
-      fetchSpecials()
+      fetchSpecials();
+      fetchRateProduct();
     })
 
     return {
       addToCart,
       goToAddProduct,
-      specialItems
+      specialItems,
+      fetchRateProduct,
+      calculateAverageRating,
+      ratings,
+      averageRating
     }
   }
 }
