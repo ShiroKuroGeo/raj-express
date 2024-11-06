@@ -1,6 +1,3 @@
-//diri sir kay ma notify ang customer kung naay new food na added.
-
-
 <template>
   <q-page>
     <q-header class="bg-pink-1">
@@ -13,15 +10,15 @@
     <div class="q-pa-md">
       <q-card v-for="notification in notifications" :key="notification.id" class="q-mb-md bg-pink-2">
         <q-card-section class="row no-wrap items-center">
-          <q-img
+          <!-- <q-img
             :src="notification.image"
             spinner-color="white"
             style="height: 100px; width: 100px"
             class="rounded-borders"
-          />
+          /> -->
           <q-card-section class="q-ml-md col">
-            <div class="text-h6">{{ notification.title }}</div>
-            <div class="text-caption">{{ notification.datetime }}</div>
+            <div class="text-h6">{{ notification.content }}</div>
+            <div class="text-caption">{{ notification.created_at }}</div>
           </q-card-section>
         </q-card-section>
       </q-card>
@@ -30,32 +27,35 @@
 </template>
 
 <script>
-import { defineComponent, ref, onMounted } from 'vue';
+import axios from 'axios'
 
-export default defineComponent({
+export default {
   name: 'NotificationPage',
-  setup() {
-    const notifications = ref([]);
-
-    const fetchNotifications = async () => {
+  data(){
+    return{
+      notifications: []
+    }
+  },
+  methods:{
+    async fetchNotification (){
       try {
-        const response = await fetch('http://your-backend-url/get_notifications.php');
-        const data = await response.json();
-        notifications.value = data;
+        const token = localStorage.getItem('token');
+        const response = await axios.get('http://localhost/raj-express/backend/controller/notificationController/getNotifController.php',{
+          headers:{
+            'Authorization': token
+          }
+        });
+        this.notifications = response.data.notifs;
       } catch (error) {
-        console.error('Error fetching notifications:', error);
+        console.log('Error in ' + error);
       }
-    };
-
-    onMounted(() => {
-      fetchNotifications();
-    });
-
-    return {
-      notifications
-    };
+    }
+  },
+  created(){
+    this.fetchNotification();
   }
-});
+  
+}
 </script>
 
 <style lang="scss" scoped>
