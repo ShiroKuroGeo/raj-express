@@ -54,8 +54,8 @@
             <div class="text-subtitle1">{{ item.product_name }} <small>x</small>{{ item.quantity }}</div>
 
             <div class="text-h6">₱ {{ parseInt(item.product_price) }}</div>
-            <div class="">Adds On {{ parseInt(item.addOns) }}</div>
-            <div class="">Total Amount: {{ parseInt(item.addOns) + parseInt(item.product_price * item.quantity) }}
+            <div class="">Adds On {{ totalAddsOn.toFixed(2) }}</div>
+            <div class="">Total Amount: {{ totalProduct.toFixed(2) }}
             </div>
           </q-card-section>
         </q-card-section>
