@@ -13,7 +13,7 @@ try {
     $database = new Database();
     $db = $database->getDb();
     
-    $query = "SELECT * FROM `ratings` WHERE `product_id` = :product_id";
+    $query = "SELECT rt.*, us.first_name, us.last_name, us.contact_number, us.profile_img FROM `ratings` AS rt INNER JOIN `users` AS us ON rt.user_id = us.user_id WHERE `product_id` = :product_id";
     $stmt = $db->prepare($query);
     $stmt->bindParam(':product_id', $authHeader);
     $stmt->execute();

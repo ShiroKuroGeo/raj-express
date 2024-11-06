@@ -30,14 +30,13 @@
                 />
               </div>
               <div class="row items-center">
-                <!-- <q-rating
+                <q-rating
                   size="1em"
                   color="yellow"
                   icon="star"
                   readonly
-                /> -->
-                
-                <div class="q-ml-sm text-subtitle2">{{ specialItems.rating }}</div>
+                />
+                <div class="q-ml-sm text-subtitle2">({{ averageRating }})</div>
               </div>
               <div class="text-subtitle1 text-weight-bold">₱ {{ specialItems.product_price }}</div>
               <div class="text-subtitle1 text-weight-normal">{{ specialItems.product_description }}</div>
@@ -49,8 +48,11 @@
           <div v-if="ratings.length === 0" class="no-ratings">
             No ratings available.
           </div>
-          <strong>Rating:</strong> {{ averageRating }} <br />
-          <div v-for="(item, index) in ratings" :key="index" class="comment">
+          <div v-for="(item, index) in ratings" :key="index" class="comment" style="border: 1px solid black; margin: 5px; padding: 5px">
+            <strong>Profile:</strong><img :src="'http://localhost/raj-express/backend/uploads/' + item.profile_img" height="50" width="50" alt=""><br>
+            <strong>User:</strong> {{ item.last_name }}, {{ item.first_name }} <br>
+            <strong>Contact Number:</strong> {{ item.contact_number }}<br>
+            <strong>Rate:</strong> {{ item.feedback }} <br>
             <strong>Comment:</strong> {{ item.fb_description }}
           </div>
         </div>
