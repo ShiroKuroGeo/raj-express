@@ -14,7 +14,7 @@ $db = $database->getDb();
 
 try {
 
-    $notifQuery = "INSERT INTO `notifications`(`user_id`,`customer_ref`,`content`) VALUES (:user_id, :customer_ref, :content)";
+    $notifQuery = "INSERT INTO `notifications`(`user_id`, `customer_ref`, `content`) VALUES (:user_id, :customer_ref, :content)";
     $orderStmt = $db->prepare($notifQuery);
     $orderStmt->bindParam(":user_id", $data['user_id']);
     $orderStmt->bindParam(":customer_ref", $data['customer_ref']);
