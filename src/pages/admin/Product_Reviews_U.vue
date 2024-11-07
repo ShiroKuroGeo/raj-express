@@ -3,13 +3,13 @@
     <h1 class="text-h4 q-mb-md">🎁 Product Review</h1>
 
     <div class="row items-center q-mb-md">
-      <div class="col">
+      <div class="col-12">
         <h2 class="text-h5">
           Review list
           <q-badge color="secondary" class="q-ml-sm">{{ reviews.length }}</q-badge>
         </h2>
       </div>
-      <div class="col-auto">
+      <div class="col-12">
         <q-input
           v-model="searchQuery"
           dense
@@ -17,11 +17,10 @@
           placeholder="Search by product name"
           class="q-mr-sm"
         >
-          <template v-slot:append>
+          <template v-slot:append  @click="searchReviews">
             <q-icon name="search" />
           </template>
         </q-input>
-        <q-btn color="primary" label="Search" @click="searchReviews" />
       </div>
     </div>
 
@@ -39,21 +38,21 @@
           <q-td key="productName" :props="props">
             <div class="row items-center">
               <q-avatar size="40px" class="q-mr-sm">
-                <img :src="props.row.productImage" :alt="props.row.productName">
+                <img :src="'http://localhost/raj-express/backend/uploads/'+props.row.productImage" :alt="props.row.product_name">
               </q-avatar>
-              <span>{{ props.row.productName }}</span>
+              <span>{{ props.row.product_name }}</span>
             </div>
           </q-td>
           <q-td key="customerInfo" :props="props">
-            <div>{{ props.row.customerName }}</div>
-            <div class="text-caption">{{ maskPhoneNumber(props.row.customerPhone) }}</div>
+            <div>{{ props.row.last_name }}, {{ props.row.first_name }}</div>
+            <div class="text-caption">{{ (props.row.contact_number) }}</div>
           </q-td>
           <q-td key="reviewText" :props="props">
-            {{ props.row.reviewText }}
+            {{ props.row.fb_description }}
           </q-td>
           <q-td key="rating" :props="props">
             <q-rating
-              v-model="props.row.rating"
+              v-model="props.row.feedback"
               size="1.5em"
               color="yellow"
               icon="star_border"
@@ -73,63 +72,98 @@ import { useQuasar } from 'quasar';
 import axios from 'axios';
 
 export default {
-  setup() {
-    const $q = useQuasar();
-    const searchQuery = ref('');
-    const reviews = ref([]);
-
-    const columns = [
-      { name: 'index', label: 'SL', field: 'index', align: 'left' },
-      { name: 'productName', label: 'Product Name', field: 'productName', align: 'left' },
-      { name: 'customerInfo', label: 'Customer Info', field: 'customerName', align: 'left' },
-      { name: 'reviewText', label: 'Review', field: 'reviewText', align: 'left' },
-      { name: 'rating', label: 'Rating', field: 'rating', align: 'left' },
-    ];
-
-    const fetchReviews = async () => {
-      try {
-        const response = await axios.get('/api/reviews.php');
-        reviews.value = response.data;
-      } catch (error) {
-        console.error('Error fetching reviews:', error);
-        $q.notify({
-          color: 'negative',
-          message: 'Failed to fetch reviews',
-          icon: 'error'
-        });
-      }
-    };
-
-    const searchReviews = async () => {
-      try {
-        const response = await axios.get(`/api/reviews.php?search=${searchQuery.value}`);
-        reviews.value = response.data;
-      } catch (error) {
-        console.error('Error searching reviews:', error);
-        $q.notify({
-          color: 'negative',
-          message: 'Failed to search reviews',
-          icon: 'error'
-        });
-      }
-    };
-
-    const maskPhoneNumber = (phone) => {
-      return phone ? phone.slice(0, 3) + '*'.repeat(phone.length - 3) : '';
-    };
-
-    return {
-      searchQuery,
-      reviews,
-      columns,
-      fetchReviews,
-      searchReviews,
-      maskPhoneNumber
-    };
+  data(){
+    return{
+      searchQuery: '',
+      reviews: [],
+      columns: [
+        { name: 'index', label: 'SL', field: (row) => row.rating_id, align: 'left' },
+        { name: 'productName', label: 'Product Name', field: (row) => row.product_name, align: 'left' },
+        { name: 'customerInfo', label: 'Customer Info', field: (row) => row.last_name +' '+ row.first_name, align: 'left' },
+        { name: 'reviewText', label: 'Review', field: (row) => row.feedback, align: 'left' },
+        { name: 'rating', label: 'Rating', field: (row) => row.fb_description, align: 'left' },
+      ],
+    }
   },
-  mounted() {
+  methods:{
+    // fb_description
+    // feedback
+    // first_name
+    // last_name
+    // product_name
+    async fetchReviews(){
+      try{
+         const response = await axios.get('http://localhost/raj-express/backend/controller/admincontroller/ratingController/getAllController.php');
+         this.reviews = response.data.reviews;
+         console.log(response.data.reviews);
+      }catch(error){
+        console.log(error);
+      }
+    },
+    async searchReviews(){
+      alert('search');
+    }
+  },
+  created(){
     this.fetchReviews();
   }
+  // setup() {
+  //   const $q = useQuasar();
+  //   const searchQuery = ref('');
+  //   const reviews = ref([]);
+
+  //   const columns = [
+  //     { name: 'index', label: 'SL', field: 'index', align: 'left' },
+  //     { name: 'productName', label: 'Product Name', field: 'productName', align: 'left' },
+  //     { name: 'customerInfo', label: 'Customer Info', field: 'customerName', align: 'left' },
+  //     { name: 'reviewText', label: 'Review', field: 'reviewText', align: 'left' },
+  //     { name: 'rating', label: 'Rating', field: 'rating', align: 'left' },
+  //   ];
+
+  //   const fetchReviews = async () => {
+  //     try {
+  //       const response = await axios.get('/api/reviews.php');
+  //       reviews.value = response.data;
+  //     } catch (error) {
+  //       console.error('Error fetching reviews:', error);
+  //       $q.notify({
+  //         color: 'negative',
+  //         message: 'Failed to fetch reviews',
+  //         icon: 'error'
+  //       });
+  //     }
+  //   };
+
+  //   const searchReviews = async () => {
+  //     try {
+  //       const response = await axios.get(`/api/reviews.php?search=${searchQuery.value}`);
+  //       reviews.value = response.data;
+  //     } catch (error) {
+  //       console.error('Error searching reviews:', error);
+  //       $q.notify({
+  //         color: 'negative',
+  //         message: 'Failed to search reviews',
+  //         icon: 'error'
+  //       });
+  //     }
+  //   };
+
+  //   const maskPhoneNumber = (phone) => {
+  //     return phone ? phone.slice(0, 3) + '*'.repeat(phone.length - 3) : '';
+  //   };
+
+  //   return {
+  //     searchQuery,
+  //     reviews,
+  //     columns,
+  //     fetchReviews,
+  //     searchReviews,
+  //     maskPhoneNumber
+  //   };
+  // },
+  // mounted() {
+  //   this.fetchReviews();
+  // }
 };
 </script>
 

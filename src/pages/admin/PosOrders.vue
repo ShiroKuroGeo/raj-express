@@ -45,11 +45,8 @@ export default {
     const fetchOrders = async () => {
       loading.value = true;
       try {
-        const response = await axios.get('http://localhost/raj-express/backend/controller/adminController/orderController/allOrderController.php');
-        const statuses = response.data.orders.map(order => order.status);
-        if(statuses == 'delivered'){
-          orders.value = response.data.orders;
-        }
+        const response = await axios.get('http://localhost/raj-express/backend/controller/adminController/orderController/allOrderControllerHistory.php');
+        orders.value = response.data.orders;
       } catch (error) {
         console.error('Failed to fetch orders:' + error);
       } finally {

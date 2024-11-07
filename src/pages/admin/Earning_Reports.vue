@@ -15,7 +15,7 @@
       </q-card-section>
 
       <q-card-section class="q-mt-md">
-        <div class="row q-col-gutter-md items-center">
+        <div class="row">
           <q-input
             v-model="startDate"
             mask="####-##-##"
@@ -23,7 +23,8 @@
             outlined
             dense
             type="date"
-            class="col"
+            class="col-12"
+            style="margin-top: 10px"
           />
           <q-input
             v-model="endDate"
@@ -32,14 +33,15 @@
             outlined
             dense
             type="date"
-            class="col"
+            class="col-12"
+            style="margin-top: 10px"
           />
-          <q-btn color="orange" label="Show" @click="fetchReports" class="col-auto" />
+          <q-btn color="orange" label="Show" @click="fetchReports" class="col-12" style="margin-top: 10px" />
         </div>
       </q-card-section>
 
       <q-card-section class="q-mt-md">
-        <div class="row q-col-gutter-md">
+        <div class="row">
           <q-card flat bordered class="col">
             <q-card-section>
               <div class="text-subtitle1">Total Sold</div>
