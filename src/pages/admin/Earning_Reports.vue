@@ -45,8 +45,8 @@
           <q-card flat bordered class="col">
             <q-card-section>
               <div class="text-subtitle1">Total Sold</div>
-              <div class="text-h6">{{ totalSold }}$ <q-icon name="attach_money" /></div>
-              <div>{{ soldPercent }}%</div>
+              <div class="text-h6">{{ total }} P </div>
+              <!-- <div>{{ soldPercent }}%</div> -->
             </q-card-section>
           </q-card>
 
@@ -61,39 +61,32 @@ import { ref } from 'vue'
 import axios from 'axios'
 
 export default {
-  setup() {
-    const startDate = ref('')
-    const endDate = ref('')
-    const totalSold = ref(0)
-    const totalTax = ref(0)
-
-    const soldPercent = ref(0)
-    const taxPercent = ref(0)
-
-    const fetchReports = async () => {
+  data(){
+    return{
+      total: 0,
+      startDate: 0,
+      endDate: 0,
+    }
+  },
+  methods:{
+    async fetchReports (){
       try {
-        const response = await axios.get('/api/earnings_reports.php', {
-          params: { start_date: startDate.value, end_date: endDate.value }
-        })
-        const data = response.data
-        totalSold.value = data.total_sold
-        totalTax.value = data.total_tax
+        const response = await axios.get('http://localhost/raj-express/backend/controller/adminController/earningController/totalEarningController.php')
+        this.total = response.data.total.total;
+        // const data = response.data
+        // totalSold.value = data.total_sold
+        // totalTax.value = data.total_tax
 
-        const total = totalSold.value + totalTax.value
-        soldPercent.value = total ? ((totalSold.value / total) * 100).toFixed(2) : 0
-        taxPercent.value = total ? ((totalTax.value / total) * 100).toFixed(2) : 0
+        // const total = totalSold.value + totalTax.value
+        // soldPercent.value = total ? ((totalSold.value / total) * 100).toFixed(2) : 0
+        // taxPercent.value = total ? ((totalTax.value / total) * 100).toFixed(2) : 0
       } catch (error) {
         console.error('Failed to fetch reports:', error)
       }
     }
-
-    return {
-      startDate,
-      endDate,
-      totalSold,
-      soldPercent,
-      fetchReports
-    }
+  },
+  created(){
+    this.fetchReports();
   }
 }
 </script>

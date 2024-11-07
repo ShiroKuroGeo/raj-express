@@ -14,12 +14,15 @@
           </div>
           <div v-if="!addresses" class="text-red q-mt-sm">No info added</div>
           <div v-else>
-            <div v-for="(a, index) in addresses" :key="a.address_id" class="text-capitalize">
-              <div class="input-group">
-                <input type="checkbox" @change="selectedIdForAddress(a.address_id)" v-model="isChecked"
-                  :value="a.address_id"> {{ 1 + index++ }}. {{ a.deliveryAddress }}, {{ a.streetNumber }}, {{ a.landmark
-                }}
-              </div>
+            <div class="text-capitalize">
+              <q-radio
+                v-for="(a, index) in addresses"
+                :key="index"
+                :label="a.landmark"
+                :val="a.address_id"
+                v-model="selectedAddress"
+              /> <br>
+              <!-- <input v-for="a in addresses" :key="a.address_id" type="radio" :value="" > {{ a.deliveryAddress }}, {{ a.streetNumber }}, {{ a.landmark }} -->
             </div>
           </div>
         </q-card-section>
@@ -106,7 +109,6 @@ export default {
       addresses: [],
       addons: [],
       selectedAddress: 0,
-      isChecked: false,
     }
   },
   methods: {
