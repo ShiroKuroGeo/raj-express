@@ -17,7 +17,7 @@ $authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : '';
 
 try {
 
-    $msgQuery = "SELECT * FROM `messages` WHERE `sender_id` || `receiver_id` = :user_id;";
+    $msgQuery = "SELECT * FROM `messages` WHERE `sender_id` = :user_id OR `receiver_id` = :user_id;";
     $messageStmt = $db->prepare($msgQuery);
     $messageStmt->bindParam(":user_id",$authHeader);
     $result = $messageStmt->execute();

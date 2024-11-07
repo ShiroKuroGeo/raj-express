@@ -4,7 +4,7 @@
       <!-- Header -->
       <q-header class="bg-pink-1 text-black">
         <q-toolbar>
-          <q-btn flat round dense icon="arrow_back" />
+          <q-btn flat round dense icon="arrow_back" @click="back" />
           <q-toolbar-title>
             RAJ Food Express
             <div class="text-caption">Active now</div>
@@ -61,6 +61,9 @@ export default {
       });
       this.messages = response.data.messages;
     },
+    back(){
+      alert();
+    },
     async sendMessage (){
       const token = localStorage.getItem('token');
       
@@ -91,11 +94,17 @@ export default {
       } else {
         throw new Error(result.error || "Message not sent!");
       }
+    },
+    loadMessage(){
+      setInterval(() => {
+        this.readMessages();
+      }, 1000);
     }
   },
   created(){
     this.readMessages();
     this.getId();
+    this.loadMessage();
   }
 }
 </script>

@@ -66,12 +66,10 @@ export default {
   },
   methods:{
     selectUser(id){
-      // this.$router.push({  });
-      console.log(id);
+      this.$router.push({ name: 'messageSomeone', params: { id } });
     },
     async allUserMessage(){
       try {
-        // getAllController.php
         const response = await axios.get('http://localhost/raj-express/backend/controller/admincontroller/messageController/getAllController.php');
         this.users = response.data.users;
       } catch (error) {

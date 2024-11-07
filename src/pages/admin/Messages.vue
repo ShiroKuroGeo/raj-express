@@ -1,8 +1,40 @@
 <template>
+  <q-page class="flex flex-center">
+    <div class="chat-container">
+      <q-header class="bg-pink-1 text-black" v-for="user in contacts">
+        <q-toolbar>
+          <q-btn flat round dense icon="arrow_back" @click="back" />
+          <q-toolbar-title>
+            {{ user.last_name }}, {{ user.first_name }}
+            <div class="text-caption">{{ user.contact_number }}</div>
+          </q-toolbar-title>
+        </q-toolbar>
+      </q-header>
+
+      <div class="chat-area">
+        <div v-for="message in messages" :key="message.msg_id" :class="message.receiver_id == currentId ? 'd-flex padding-top-bottom message-right' : 'd-flex padding-top-bottom message-left'">
+          <div class="message">
+            <q-card flat bordered class="message-content">
+              <q-card-section>{{ message.content }}</q-card-section>
+            </q-card>
+          </div>
+        </div>
+      </div>
+
+      <div class="message-input q-pa-sm">
+        <q-input v-model="message" outlined dense placeholder="Type a message" bg-color="white" >
+          <template v-slot:after>
+            <q-btn round flat icon="send" @click="sendMessage" />
+          </template>
+        </q-input>
+      </div>
+    </div>
+  </q-page>
+</template>
+<!-- <template>
   <q-page padding>
     <div class="row">
-      <!-- Contacts List -->
-      <div class="col-3">
+      <div class="col-12">
         <q-card>
           <q-card-section>
             <div class="text-h6">Messages</div>
@@ -35,58 +67,29 @@
         </q-card>
       </div>
 
-      <!-- Chat Section -->
-      <div class="col-9">
-        <q-card v-if="selectedContact">
-          <q-card-section class="bg-primary text-white">
-            <div class="text-h6">{{ selectedContact.name }}</div>
-            <div>{{ selectedContact.phone }}</div>
-          </q-card-section>
-          <q-card-section style="height: 300px; overflow-y: auto">
-            <div v-for="message in messages" :key="message.id">
-              <q-chip
-                :color="message.sender === 'me' ? 'orange' : 'grey-5'"
-                :class="{
-                  'float-right': message.sender === 'me',
-                  'float-left': message.sender !== 'me',
-                }"
-                text-color="white"
-              >
-                {{ message.text }}
-              </q-chip>
+      <div class="col-12">
+        
+        <div class="chat-area">
+          <div v-for="message in messages" :key="message.msg_id" :class="message.sender_id == currentId ? 'd-flex padding-top-bottom message-right' : 'd-flex padding-top-bottom message-left'">
+            <div class="message">
+              <q-card flat bordered class="message-content">
+                <q-card-section>{{ message.content }}</q-card-section>
+              </q-card>
             </div>
-          </q-card-section>
-          <q-card-section>
-            <q-input
-              v-model="newMessage"
-              placeholder="Type a message..."
-              dense
-              outlined
-              @keyup.enter="sendMessage"
-              append="send"
-            >
-              <template v-slot:append>
-                <q-btn
-                  flat
-                  round
-                  icon="send"
-                  @click="sendMessage"
-                  color="primary"
-                />
-              </template>
-            </q-input>
-          </q-card-section>
-        </q-card>
-        <q-card v-else>
-          <q-card-section class="text-center">
-            <q-icon name="message" size="lg" />
-            <div>Select a contact to start chatting.</div>
-          </q-card-section>
-        </q-card>
+          </div>
+        </div>
+
+        <div class="message-input q-pa-sm">
+          <q-input v-model="message" outlined dense placeholder="Type a message" bg-color="white" >
+            <template v-slot:after>
+              <q-btn round flat icon="send" @click="sendMessage" />
+            </template>
+          </q-input>
+        </div>
       </div>
     </div>
   </q-page>
-</template>
+</template> -->
 
 <script>
 import axios from "axios";
@@ -95,71 +98,134 @@ export default {
   data() {
     return {
       contacts: [],
-      messages: [],
-      selectedContact: null,
-      newMessage: "",
-      searchQuery: "",
+      currentId: 0,
+      message: '',
+      messages: []
     };
   },
-  computed: {
-    filteredContacts() {
-      return this.contacts.filter((contact) =>
-        contact.name.toLowerCase().includes(this.searchQuery.toLowerCase())
-      );
-    },
-  },
-  mounted() {
-    this.fetchContacts();
-  },
   methods: {
-    fetchContacts() {
-      axios
-        .get("http://localhost/api/contacts.php")
-        .then((response) => {
-          this.contacts = response.data;
-        })
-        .catch((error) => {
-          console.error(error);
+    async fetchUserInfo() {
+      try{
+        const token = this.$route.params.id;
+        const response = await axios.get('http://localhost/raj-express/backend/controller/admincontroller/messageController/getUserInfoController.php',{
+          headers:{
+            "Authorization": token,
+          }
         });
-    },
-    selectContact(contact) {
-      this.selectedContact = contact;
-      this.fetchMessages(contact.id);
-    },
-    fetchMessages(contactId) {
-      axios
-        .get(`http://localhost/api/messages.php?contact_id=${contactId}`)
-        .then((response) => {
-          this.messages = response.data;
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-    },
-    sendMessage() {
-      if (this.newMessage.trim() !== "") {
-        const messageData = {
-          contact_id: this.selectedContact.id,
-          text: this.newMessage,
-          sender: "me",
-        };
-        axios
-          .post("http://localhost/api/send_message.php", messageData)
-          .then(() => {
-            this.messages.push({ ...messageData, id: Date.now() });
-            this.newMessage = "";
-          })
-          .catch((error) => {
-            console.error(error);
-          });
+        this.contacts = response.data.users;
+        this.currentId = token;
+      }catch(error){
+        console.log('Error in ' + error);
       }
     },
+    async fetchMessages(){
+      try{
+        const token = this.$route.params.id;
+        const response = await axios.get('http://localhost/raj-express/backend/controller/admincontroller/messageController/getUserMessageController.php',{
+          headers:{
+            "Authorization": token,
+          }
+        });
+        this.messages = response.data.message;
+      }catch(error){
+        console.log('Error in ' + error);
+      }
+    },
+    async sendMessage (){
+      const token = localStorage.getItem('token');
+      const params = this.$route.params.id;
+      
+      const messageData = {
+        sender_id: token,
+        receiver_id: params,
+        content: this.message
+      };
+
+      const response = await fetch("http://localhost/raj-express/backend/controller/admincontroller/messageController/sendController.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(messageData)
+      });
+
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorMessage}`);
+      }
+
+      const result = await response.json();
+
+      if (result && result.success) {
+        this.fetchMessages();
+        this.message = '';
+      } else {
+        throw new Error(result.error || "Message not sent!");
+      }
+    },
+    loadMessage(){
+      setInterval(() => {
+        this.fetchMessages();
+      }, 1000);
+    },
+    back(){
+      this.$router.back();
+    },
+  },
+  created() {
+    this.fetchUserInfo();
+    this.fetchMessages();
+    this.loadMessage();
   },
 };
 </script>
 
 <style scoped>
-.q-chip {
-  margin-bottom: 8px;
+.chat-container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #ddd;
+}
+
+.d-flex{
+  display: flex;
+}
+
+.message-left {
+  justify-content: flex-start;
+}
+
+.message-right {
+  justify-content: flex-end;
+}
+
+.message-content {
+  width: 100%;
+}
+
+.chat-area {
+  flex-grow: 1;
+  overflow-y: auto;
+  background-color: white;
+}
+
+.message-input {
+  background-color: #f0f0f0;
+}
+
+.padding-top-bottom{
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.q-toolbar {
+  min-height: 70px;
+}
+
+.q-toolbar-title {
+  font-size: 1.2rem;
+  font-weight: bold;
 }
 </style>

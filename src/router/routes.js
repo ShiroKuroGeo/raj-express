@@ -61,6 +61,7 @@ const routes = [
     component: () => import('layouts/AdminLayout.vue'),
     children: [
       { path: 'message', component: () => import('pages/admin/Message.vue') },
+      { path: 'message/:id', name: 'messageSomeone', component: () => import('pages/admin/Messages.vue') },
     ],
   },
   {
