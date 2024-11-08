@@ -131,6 +131,35 @@ export default {
         console.log('Error in ' + error);
       }
     },
+    async setNotitication(){
+      const content = 'Good Day, Raj Express send you a message!';
+      const params = this.$route.params.id;
+      const notificationData = {
+        user_id: params,
+        customer_ref: null,
+        content: content
+      };
+
+      try{
+        const response = await fetch("http://localhost/raj-express/backend/controller/admincontroller/notificationController/setNotificationController.php", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(notificationData)
+        });
+
+        if(response.status == 200){
+          alert('Notification Sent!');
+        }else{
+          alert('The status is : '+response.status);
+        }
+
+      }catch(error){
+        console.log('Error in '+ error);
+      }
+
+    },
     async sendMessage (){
       const token = localStorage.getItem('token');
       const params = this.$route.params.id;
@@ -158,6 +187,7 @@ export default {
 
       if (result && result.success) {
         this.fetchMessages();
+        this.setNotitication();
         this.message = '';
       } else {
         throw new Error(result.error || "Message not sent!");

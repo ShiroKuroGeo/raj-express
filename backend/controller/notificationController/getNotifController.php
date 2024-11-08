@@ -17,7 +17,7 @@ $authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : '';
 
 try {
 
-    $msgQuery = "SELECT * FROM `notifications` WHERE `user_id` = :user_id";
+    $msgQuery = "SELECT * FROM `notifications` WHERE `user_id` = :user_id ORDER BY `created_at` DESC";
     $notifStmt = $db->prepare($msgQuery);
     $notifStmt->bindParam(":user_id",$authHeader);
     $result = $notifStmt->execute();

@@ -16,6 +16,7 @@ try {
     GROUP_CONCAT(prod.product_name SEPARATOR ', ') AS product_names,
     ord.extra, 
     ord.status, 
+    ord.user_id, 
     MIN(ord.created_at) AS first_order_date, 
     address.personName AS addressContactPerson, 
     address.phoneNumber AS addressContactNumber, 
@@ -44,6 +45,7 @@ GROUP BY ord.customer_reference;";
         $set->sendJsonResponse([
             "success" => true,
             'cusref' => $orderDetails['cusref'],
+            'user_id' => $orderDetails['user_id'],
             'total_orders' => $orderDetails['total_orders'],
             'product_names' => $orderDetails['product_names'],
             'extra' => $orderDetails['extra'],

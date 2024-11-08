@@ -128,6 +128,7 @@ export default {
       products: [],
       extra: [],
       cusref: '',
+      user_id: '',
       total_orders: '',
       product_names: '',
       status: '',
@@ -171,12 +172,41 @@ export default {
         hour12: true
       });
     },
+    async setNotitication(){
+      const content = 'Good Day, your has been '+this.status;
+      const notificationData = {
+        user_id: this.user_id,
+        customer_ref: this.cusref,
+        content: content
+      };
+
+      try{
+        const response = await fetch("http://localhost/raj-express/backend/controller/admincontroller/notificationController/setNotificationController.php", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(notificationData)
+        });
+
+        if(response.status == 200){
+          alert('Notification Sent!');
+        }else{
+          alert('The status is : '+response.status);
+        }
+
+      }catch(error){
+        console.log('Error in '+ error);
+      }
+
+    },
     async changeStatus(){
       const token = this.$route.params.id;
       const data = {
         product_id: token,
         status: this.status
       };
+      
       const response = await fetch("http://localhost/raj-express/backend/controller/admincontroller/orderController/changeStatusOrderController.php", {
         method: "POST",
         headers: {
@@ -187,6 +217,7 @@ export default {
 
       if(response.status == 200){
         alert('Status Changed!');
+        this.setNotitication();
       }else{
         alert('The status is : '+response.status);
       }

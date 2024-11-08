@@ -11,7 +11,7 @@ try {
     // customer_reference
     $msgQuery = "UPDATE `orders` SET `status` = :stat WHERE customer_reference = :cusref";
     $orderStmt = $db->prepare($msgQuery);
-    $orderStmt->bindParam(":cusref", $data['product_id']);
+    $orderStmt->bindParam(":cusref", $data['product_id']); 
     $orderStmt->bindParam(":stat", $data['status']);
     $result = $orderStmt->execute();
 
