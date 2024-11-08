@@ -14,7 +14,7 @@
         color="white"
         text-color="blue"
         unelevated
-        to="/"
+        @click="goBack"
         label="Go Home"
         no-caps
       />
@@ -26,6 +26,11 @@
 import { defineComponent } from 'vue';
 
 export default defineComponent({
-  name: 'ErrorNotFound'
+  name: 'ErrorNotFound',
+  methods:{
+    goBack(){
+      this.$router.back();
+    }
+  }
 });
 </script>

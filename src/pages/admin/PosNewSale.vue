@@ -157,7 +157,6 @@ export default {
         products.value = response.data.products || [];
         filteredProducts.value = products.value;
 
-        // Extract unique categories from products
         const uniqueCategories = [...new Set(products.value.map(product => product.category))];
         categories.value = ["All Categories", ...uniqueCategories];
       } catch (error) {
@@ -196,7 +195,6 @@ export default {
 
     const cancelOrder = () => {
       console.log('Order cancelled');
-      // You can add any additional logic for cancelling the order here
     };
 
     const newOrder = () => {
@@ -213,33 +211,62 @@ export default {
     };
 
     const confirmOrder = async () => {
-      const orderData = {
-        order_number: generateOrderNumber(),
-        order_total: totalAmount.value,
-        payment_method: paymentMethod.value,
-        items: order.value.map(item => ({
-          product_id: item.id,
-          quantity: item.qty,
-          price: item.price,
-          name: item.name // Include the product name
-        }))
-      };
+      // Tanan nga 1 sa admin
+      let orderData = [];
 
-      try {
-        console.log('Sending order data:', orderData);
-        const response = await axios.post('http://localhost/raj-express/backend/controller/posnewsale.php', orderData);
-        console.log('Response from backend:', response.data);
-        if (response.data && response.data.success) {
-          console.log('Order placed successfully!');
-          alert('Order placed successfully!');
-          newOrder();
-        } else {
-          throw new Error(response.data.message || 'Failed to place order');
-        }
-      } catch (error) {
-        console.error('Error placing order:', error);
-        alert('Failed to place order. Please try again.');
+      order.value.map(item => {
+        orderData.push({
+          order_number: generateOrderNumber(),
+          order_total: totalAmount.value,
+          user_id: 1,
+          extra: null,
+          order_status: 'pending',
+          payment_method: paymentMethod.value,
+          product_id: item.id,
+          address_id: 1,
+          order_qty: item.qty,
+          payment_total: item.price* item.qty,
+          name: item.name,
+          payment_status: 'pending',
+        });
+      });
+
+      const response = await fetch("http://localhost/raj-express/backend/controller/adminController/orderController/addOrderController.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ orders: orderData })
+      });
+
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorMessage}`);
       }
+
+      const result = await response.json();
+
+      if (result && result.success) {
+        alert('Order Created!');
+      } else {
+        throw new Error(result.error || "Failed to add product to cart");
+      }
+      
+      // try {
+      //   console.log('Sending order data:', orderData);
+      //   const response = await axios.post('http://localhost/raj-express/backend/controller/posnewsale.php', orderData);
+      //   console.log('Response from backend:', response.data);
+      //   if (response.data && response.data.success) {
+      //     console.log('Order placed successfully!');
+      //     alert('Order placed successfully!');
+      //     newOrder();
+      //   } else {
+      //     throw new Error(response.data.message || 'Failed to place order');
+      //   }
+      // } catch (error) {
+      //   console.error('Error placing order:', error);
+      //   alert('Failed to place order. Please try again.');
+      // }
     };
 
     const generateOrderNumber = () => {
