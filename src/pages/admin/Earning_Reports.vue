@@ -46,7 +46,6 @@
             <q-card-section>
               <div class="text-subtitle1">Total Sold</div>
               <div class="text-h6">{{ total }} P </div>
-              <!-- <div>{{ soldPercent }}%</div> -->
             </q-card-section>
           </q-card>
 
