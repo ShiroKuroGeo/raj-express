@@ -57,39 +57,50 @@
 </template>
 
 <script>
-import { ref } from 'vue'
-import axios from 'axios'
+import axios from 'axios';
 
 export default {
-  data(){
-    return{
+  data() {
+    return {
       total: 0,
-      startDate: 0,
-      endDate: 0,
-    }
+      startDate: '',
+      endDate: '',
+    };
   },
-  methods:{
-    async fetchReports (){
-      try {
-        const response = await axios.get('http://localhost/raj-express/backend/controller/adminController/earningController/totalEarningController.php')
-        this.total = response.data.total.total;
-        // const data = response.data
-        // totalSold.value = data.total_sold
-        // totalTax.value = data.total_tax
-
-        // const total = totalSold.value + totalTax.value
-        // soldPercent.value = total ? ((totalSold.value / total) * 100).toFixed(2) : 0
-        // taxPercent.value = total ? ((totalTax.value / total) * 100).toFixed(2) : 0
-      } catch (error) {
-        console.error('Failed to fetch reports:', error)
+  methods: {
+    async fetchReports() {
+      if (!this.startDate || !this.endDate) {
+        console.warn('Please select both start and end dates');
+        return;
       }
-    }
+      try {
+        const response = await axios.get(
+          'http://localhost/raj-express/backend/controller/adminController/earningController/totalEarningController.php',
+          {
+            params: {
+              startDate: this.startDate,
+              endDate: this.endDate,
+            },
+          }
+        );
+        this.total = response.data.total.total;
+        console.log(response.data.total);
+      } catch (error) {
+        console.error('Failed to fetch reports:', error);
+      }
+    },
   },
-  created(){
-    this.fetchReports();
-  }
-}
+  watch: {
+    startDate() {
+      if (this.endDate) this.fetchReports();
+    },
+    endDate() {
+      if (this.startDate) this.fetchReports();
+    },
+  },
+};
 </script>
+
 
 <style scoped>
 .q-page {
