@@ -84,7 +84,6 @@ export default {
           }
         );
         this.total = response.data.total.total;
-        console.log(response.data.total);
       } catch (error) {
         console.error('Failed to fetch reports:', error);
       }
