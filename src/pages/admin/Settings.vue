@@ -2,11 +2,12 @@
   <q-page padding class="settings-page">
     <h2 class="settings-title">Settings</h2>
 
-    <div class="profile-image-container">
+    <!-- Admin dapat walay profile picture tungod kay isa ray tindero (Usa ray mo tinda) -->
+    <!-- <div class="profile-image-container">
       <div class="profile-image-wrapper">
         <q-img
-          v-if="profile.image"
-          :src="profile.image"
+          v-if="profile_img"
+          :src="'http://localhost/raj-express/backend/uploads/' + profile_img"
           class="profile-image"
         />
         <q-btn
@@ -25,29 +26,33 @@
         accept="image/*"
         style="display: none;"
       />
-    </div>
+    </div> -->
 
-    <q-form @submit.prevent="saveProfile" class="settings-form">
-      <!-- Basic Information Section -->
+    <q-form class="settings-form">
       <q-card class="settings-card">
         <q-card-section>
           <div class="section-title">Basic information</div>
           <div class="input-row">
-            <label>Name</label>
-            <q-input v-model="profile.name" filled />
+            <label>Firstname</label>
+            <q-input v-model="first_name" filled />
+          </div>
+          <div class="input-row">
+            <label>Lastname</label>
+            <q-input v-model="last_name" filled />
           </div>
           <div class="input-row">
             <label>Email</label>
-            <q-input v-model="profile.email" type="email" filled />
+            <q-input v-model="email" type="email" filled />
           </div>
           <div class="input-row">
             <label>Phone</label>
-            <q-input v-model="profile.phone" type="tel" filled />
+            <q-input v-model="contact_number" type="tel" filled />
           </div>
           <div class="input-row">
             <label>Address</label>
-            <q-input v-model="profile.address" filled />
+            <q-input v-model="address" filled />
           </div>
+          <q-btn @click="changeInformation" label="Save Basic Information" color="orange" class="save-button" />
         </q-card-section>
       </q-card>
 
@@ -57,44 +62,31 @@
           <div class="section-title">Change password</div>
           <div class="input-row">
             <label>Current Password</label>
-            <q-input v-model="password.currentPassword" type="password" filled>
+            <q-input v-model="currentPassword" :type="showCurrentPassword ? 'text' : 'password'" filled>
               <template v-slot:append>
-                <q-icon
-                  :name="showCurrentPassword ? 'visibility_off' : 'visibility'"
-                  class="cursor-pointer"
-                  @click="showCurrentPassword = !showCurrentPassword"
-                />
+                <q-icon :name="showCurrentPassword ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="CurrentPasswordShowHide" />
               </template>
             </q-input>
           </div>
           <div class="input-row">
             <label>New Password</label>
-            <q-input v-model="password.newPassword" :type="showNewPassword ? 'text' : 'password'" filled>
+            <q-input v-model="newPassword" :type="showNewPassword ? 'text' : 'password'" filled>
               <template v-slot:append>
-                <q-icon
-                  :name="showNewPassword ? 'visibility_off' : 'visibility'"
-                  class="cursor-pointer"
-                  @click="showNewPassword = !showNewPassword"
-                />
+                <q-icon :name="showNewPassword ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="NewPasswordShowHide" />
               </template>
             </q-input>
           </div>
           <div class="input-row">
             <label>Confirm Password</label>
-            <q-input v-model="password.confirmPassword" :type="showConfirmPassword ? 'text' : 'password'" filled>
+            <q-input v-model="confirmPassword" :type="confirmNewPassword ? 'text' : 'password'" filled>
               <template v-slot:append>
-                <q-icon
-                  :name="showConfirmPassword ? 'visibility_off' : 'visibility'"
-                  class="cursor-pointer"
-                  @click="showConfirmPassword = !showConfirmPassword"
-                />
+                <q-icon :name="confirmNewPassword ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="ConfirmPasswordShowHide" />
               </template>
             </q-input>
           </div>
+          <q-btn @click="changePassword" label="Save Basic Information" color="orange" class="save-button" />
         </q-card-section>
       </q-card>
-
-      <q-btn type="submit" label="Save Changes" color="orange" class="save-button" />
     </q-form>
   </q-page>
 </template>
@@ -105,97 +97,115 @@ import axios from 'axios';
 export default {
   data() {
     return {
-      profile: {
-        name: '',
-        email: '',
-        phone: '',
-        image: '',
-        address: ''
-      },
-      password: {
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-      },
+      user_id: '',
+      first_name: '',
+      last_name: '',
+      address: '',
+      contact_number: '',
+      email: '',
+      password_hash: '',
+      user_type: '',
+      profile_img: '',
+      status: '',
+      date_deletion: '',
+      created_at: '',
+      updated_at: '',
+      newPassword: '',
+      confirmPassword: '',
+      currentPassword: '',
       showCurrentPassword: false,
       showNewPassword: false,
-      showConfirmPassword: false,
+      confirmNewPassword: false,
       profileImage: null
     };
   },
   methods: {
+    CurrentPasswordShowHide(){
+      this.showCurrentPassword = !this.showCurrentPassword;
+    },
+    NewPasswordShowHide(){
+      this.showNewPassword = !this.showNewPassword;
+    },
+    ConfirmPasswordShowHide(){
+      this.confirmNewPassword = !this.confirmNewPassword;
+    },
     async fetchProfile() {
       try {
-        const response = await axios.get('http://localhost/raj-express/backend/controller/profile.php');
-        console.log('Profile response:', response.data);
-        if (response.data && !response.data.error) {
-          this.profile = response.data;
-        } else {
-          throw new Error(response.data.error || 'Failed to fetch profile');
-        }
+        const response = await axios.get('http://localhost/raj-express/backend/controller/admincontroller/settingcontroller.php');
+        this.user_id = response.data.user_id;
+        this.first_name = response.data.first_name;
+        this.last_name = response.data.last_name;
+        this.address = response.data.address;
+        this.contact_number = response.data.contact_number;
+        this.email = response.data.email;
+        this.password_hash = response.data.password_hash;
+        this.user_type = response.data.user_type;
+        this.profile_img = response.data.profile_img;
+        this.status = response.data.status;
+        this.date_deletion = response.data.date_deletion;
+        this.created_at = response.data.created_at;
+        this.updated_at = response.data.updated_at;
       } catch (error) {
-        console.error('Error fetching profile:', error);
-        this.$q.notify({
-          color: 'negative',
-          message: 'Failed to fetch profile. Please try again later.',
-          icon: 'report_problem'
-        });
-        // Initialize profile with empty values
-        this.profile = {
-          name: '',
-          email: '',
-          phone: '',
-          image: ''
-        };
+        console.log('Error in ' + error);
       }
     },
-    async saveProfile() {
+    async changeInformation() {
       try {
-        const formData = new FormData();
-        formData.append('name', this.profile.name);
-        formData.append('email', this.profile.email);
-        formData.append('phone', this.profile.phone);
-        formData.append('address', this.profile.address);
-        formData.append('currentPassword', this.password.currentPassword);
-        formData.append('newPassword', this.password.newPassword);
-        formData.append('confirmPassword', this.password.confirmPassword);
-        if (this.profileImage) {
-          formData.append('image', this.profileImage);
+        const dataInformation = {
+          first_name: this.first_name,
+          last_name: this.last_name,
+          email: this.email,
+          contact_number: this.contact_number,
+          address: this.address
+        };
+
+        const response = await fetch("http://localhost/raj-express/backend/controller/admincontroller/changeInformation.php", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(dataInformation)
+        });
+
+        if(response.status){
+          alert('Information of admin is done!');
+        }else{
+          alert('Failed to change information!');
+        }
+       
+      } catch (error) {
+        console.log('Error in ' + error);
+      }
+    },
+    async changePassword(){
+      try {
+        if(this.newPassword === this.confirmPassword){
+          const dataPassword = {
+            userId: this.user_id,
+            currentPassword: this.currentPassword,
+            newPassword: this.newPassword,
+          };
+
+          axios.post('http://localhost/raj-express/backend/controller/admincontroller/changePassword.php', dataPassword)
+            .then(response => {
+              console.log('Password updated successfully:', response.data);
+              window.location.reload();
+            })
+            .catch(error => {
+              console.error('Failed to update password:', error.response.data);
+              window.location.reload();
+            });
+
+        }else{
+          alert('Password not match!');
         }
 
-        const response = await axios.post('http://localhost/raj-express/backend/controller/update-profile.php', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
-
-        console.log('Profile update response:', response.data);
-
-        this.$q.notify({
-          type: 'positive',
-          message: 'Profile updated successfully!'
-        });
-
-        // Fetch updated profile data
-        await this.fetchProfile();
       } catch (error) {
-        console.error('Error saving profile:', error);
-        this.$q.notify({
-          color: 'negative',
-          message: 'Failed to save profile. Please try again later.',
-          icon: 'report_problem'
-        });
+        console.log('Error in ' + error);
       }
     },
     handleImageUpload(event) {
-      const file = event.target.files[0];
-      if (file) {
-        // Handle the file upload here
-        // You might want to preview the image and prepare it for submission
-        this.profileImage = file;
-        // Create a temporary URL for preview
-        this.profile.image = URL.createObjectURL(file);
-      }
+      
     }
   },
   created() {
