@@ -108,6 +108,7 @@ const routes = [
       { path: '/checkout', component: () => import('pages/user/CheckOut_Page.vue') },
       { path: '/rating', component: () => import('pages/user/Rating_Page.vue') },
       { path: '/notifications', component: () => import('pages/user/Notification.vue') },
+      { path: '/payment-success/:id', component: () => import('pages/user/successOnlinePayment.vue') },
       { path: '/product-order-rating/:id', name: 'productRating', component: () => import('pages/user/rateOrder.vue') },
     ]
   },

@@ -104,7 +104,7 @@ export default {
     return {
       address: '',
       paymentMethod: 'cash',
-      paymentOptions: [{ label: 'Cash on Delivery', value: 'cash' }, { label: 'G-Cash', value: 'gcash' }],
+      paymentOptions: [{ label: 'Cash on Delivery', value: 'cash' }, { label: 'Online Payment', value: 'online' }],
       cartItems: [],
       addresses: [],
       addons: [],
@@ -153,7 +153,7 @@ export default {
     },
     async placeOrder() {
       try {
-        if (this.selectedAddress != 0) {
+        if(this.paymentMethod == 'online'){
           const token = localStorage.getItem('token');
           let orderData = [];
 
@@ -175,7 +175,7 @@ export default {
                   price: parseFloat(addon.ao_price), 
                   quantity: addon.quantity
               }));
-
+              
             orderData.push({
               user_id: token,
               cart_id: item.cart_id,
@@ -184,12 +184,17 @@ export default {
               order_qty: item.quantity,
               extra: selectedAddons.length > 0 ? selectedAddons : null,
               payment_method: this.paymentMethod,
-              payment_total: paymentTotal,
+              payment_total: parseInt(paymentTotal),
               payment_status: this.paymentMethod === 'cash' ? 'pending' : 'pending on gcash',
+
+              onlineTotal: item.product_price * 100,
+              description: 'Online Payment',
+              name: item.product_name,
+              quantity: item.quantity,
             });
           });
 
-          const response = await fetch("http://localhost/raj-express/backend/controller/orderController/add.php", {
+          const response = await fetch("http://localhost/raj-express/backend/controller/onlinePaymentController/gcashPaymentController.php", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -205,14 +210,79 @@ export default {
           const result = await response.json();
 
           if (result && result.success) {
-            alert('Order Created!');
+            // alert('Order Created!');
+            window.location.href = result.success.data.attributes.checkout_url;
           } else {
             throw new Error(result.error || "Failed to add product to cart");
           }
 
-        } else {
-          console.log('No Selected Address.');
+        }else if(this.paymentMethod == 'cash'){ 
+          console.log('Cash Payment');
+        }else{
+          console.log('No Selected Payment Method!');
         }
+
+
+        // if (this.selectedAddress != 0) {
+        //   const token = localStorage.getItem('token');
+        //   let orderData = [];
+
+        //   this.cartItems.forEach(item => {
+        //     const productTotal = parseFloat(item.product_price) * parseInt(item.quantity);
+
+        //     const addonsTotal = this.addons
+        //         .filter(addon => addon.selected)
+        //         .reduce((total, addon) => {
+        //             return total + (parseFloat(addon.ao_price) * (addon.quantity || 1)); 
+        //         }, 0);
+
+        //     const paymentTotal = (productTotal + addonsTotal).toFixed(2);
+
+        //     let selectedAddons = this.addons
+        //       .filter(addon => addon.selected)
+        //       .map(addon => ({
+        //           name: addon.ao_name,
+        //           price: parseFloat(addon.ao_price), 
+        //           quantity: addon.quantity
+        //       }));
+
+        //     orderData.push({
+        //       user_id: token,
+        //       cart_id: item.cart_id,
+        //       product_id: item.product_id,
+        //       address_id: this.selectedAddress,
+        //       order_qty: item.quantity,
+        //       extra: selectedAddons.length > 0 ? selectedAddons : null,
+        //       payment_method: this.paymentMethod,
+        //       payment_total: paymentTotal,
+        //       payment_status: this.paymentMethod === 'cash' ? 'pending' : 'pending on gcash',
+        //     });
+        //   });
+
+        //   const response = await fetch("http://localhost/raj-express/backend/controller/orderController/add.php", {
+        //     method: "POST",
+        //     headers: {
+        //       "Content-Type": "application/json",
+        //     },
+        //     body: JSON.stringify({ orders: orderData })
+        //   });
+
+        //   if (!response.ok) {
+        //     const errorMessage = await response.text();
+        //     throw new Error(`HTTP error! status: ${response.status}, message: ${errorMessage}`);
+        //   }
+
+        //   const result = await response.json();
+
+        //   if (result && result.success) {
+        //     alert('Order Created!');
+        //   } else {
+        //     throw new Error(result.error || "Failed to add product to cart");
+        //   }
+
+        // } else {
+        //   console.log('No Selected Address.');
+        // }
 
       } catch (error) {
         console.log('Error in ' + error.message);
