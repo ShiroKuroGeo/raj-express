@@ -153,136 +153,141 @@ export default {
     },
     async placeOrder() {
       try {
-        if(this.paymentMethod == 'online'){
-          const token = localStorage.getItem('token');
-          let orderData = [];
+        
+        if (this.selectedAddress != 0) {
+          if(this.paymentMethod === 'cash'){
 
-          this.cartItems.forEach(item => {
-            const productTotal = parseFloat(item.product_price) * parseInt(item.quantity);
-
-            const addonsTotal = this.addons
+            const token = localStorage.getItem('token');
+            let orderData = [];
+  
+            this.cartItems.forEach(item => {
+              const productTotal = parseFloat(item.product_price) * parseInt(item.quantity);
+  
+              const addonsTotal = this.addons
+                  .filter(addon => addon.selected)
+                  .reduce((total, addon) => {
+                      return total + (parseFloat(addon.ao_price) * (addon.quantity || 1)); 
+                  }, 0);
+  
+              const paymentTotal = (productTotal + addonsTotal).toFixed(2);
+  
+              let selectedAddons = this.addons
                 .filter(addon => addon.selected)
-                .reduce((total, addon) => {
-                    return total + (parseFloat(addon.ao_price) * (addon.quantity || 1)); 
-                }, 0);
-
-            const paymentTotal = (productTotal + addonsTotal).toFixed(2);
-
-            let selectedAddons = this.addons
-              .filter(addon => addon.selected)
-              .map(addon => ({
-                  name: addon.ao_name,
-                  price: parseFloat(addon.ao_price), 
-                  quantity: addon.quantity
-              }));
-              
-            orderData.push({
-              user_id: token,
-              cart_id: item.cart_id,
-              product_id: item.product_id,
-              address_id: this.selectedAddress,
-              order_qty: item.quantity,
-              extra: selectedAddons.length > 0 ? selectedAddons : null,
-              payment_method: this.paymentMethod,
-              payment_total: parseInt(paymentTotal),
-              payment_status: this.paymentMethod === 'cash' ? 'pending' : 'pending on gcash',
-
-              onlineTotal: item.product_price * 100,
-              description: 'Online Payment',
-              name: item.product_name,
-              quantity: item.quantity,
+                .map(addon => ({
+                    name: addon.ao_name,
+                    price: parseFloat(addon.ao_price), 
+                    quantity: addon.quantity
+                }));
+  
+              orderData.push({
+                user_id: token,
+                cart_id: item.cart_id,
+                product_id: item.product_id,
+                address_id: this.selectedAddress,
+                order_qty: item.quantity,
+                extra: selectedAddons.length > 0 ? selectedAddons : null,
+                payment_method: this.paymentMethod,
+                payment_total: paymentTotal,
+                payment_status: this.paymentMethod === 'cash' ? 'pending' : 'pending on gcash',
+              });
             });
-          });
+  
+            const response = await fetch("http://localhost/raj-express/backend/controller/orderController/add.php", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ orders: orderData })
+            });
+  
+            if (!response.ok) {
+              const errorMessage = await response.text();
+              throw new Error(`HTTP error! status: ${response.status}, message: ${errorMessage}`);
+            }
+  
+            const result = await response.json();
+  
+            if (result && result.success) {
+              alert('Order Created!');
+            } else {
+              throw new Error(result.error || "Failed to add product to cart");
+            }
+          }else if(this.paymentMethod === 'online'){
+            const token = localStorage.getItem('token');
+            let orderData = [];
 
-          const response = await fetch("http://localhost/raj-express/backend/controller/onlinePaymentController/gcashPaymentController.php", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ orders: orderData })
-          });
+            this.cartItems.forEach(item => {
+                const productTotal = parseFloat(item.product_price) * parseInt(item.quantity);
 
-          if (!response.ok) {
-            const errorMessage = await response.text();
-            throw new Error(`HTTP error! status: ${response.status}, message: ${errorMessage}`);
+                const addonsTotal = this.addons
+                    .filter(addon => addon.selected)
+                    .reduce((total, addon) => {
+                        return total + (parseFloat(addon.ao_price) * (addon.quantity || 1));
+                    }, 0);
+
+                const paymentTotal = (productTotal + addonsTotal).toFixed(2);
+
+                let selectedAddons = this.addons
+                    .filter(addon => addon.selected)
+                    .map(addon => ({
+                        name: addon.ao_name,
+                        price: parseFloat(addon.ao_price),
+                        quantity: addon.quantity
+                    }));
+
+                let onlineTotal = (productTotal + addonsTotal) * 100;
+
+                orderData.push({
+                    user_id: token,
+                    cart_id: item.cart_id,
+                    product_id: item.product_id,
+                    address_id: this.selectedAddress,
+                    order_qty: item.quantity,
+                    extra: selectedAddons.length > 0 ? selectedAddons : null,
+                    payment_method: this.paymentMethod,
+                    payment_total: parseInt(paymentTotal),
+                    payment_status: this.paymentMethod === 'cash' ? 'pending' : 'pending on gcash',
+                    onlineTotal: onlineTotal,
+                    description: selectedAddons.length > 0 ? 'extra: ' + selectedAddons : 'no extra',
+                    name: item.product_name,
+                    quantity: 1,
+                });
+            });
+
+            try {
+                const response = await fetch("http://localhost/raj-express/backend/controller/onlinePaymentController/gcashPaymentController.php", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ orders: orderData })
+                });
+
+                if (!response.ok) {
+                    const errorMessage = await response.text();
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorMessage}`);
+                }
+
+                const result = await response.json();
+
+                if (result && result.success) {
+                    alert('You are redirected to PayMongo for online payment!');
+                    window.location.href = result.success;
+                } else {
+                    throw new Error(result.error || "Failed to add product to cart or missing checkout URL");
+                }
+
+            } catch (error) {
+                console.error("Payment process error:", error);
+                alert("An error occurred during the payment process. Please try again.");
+            }
+          }else{
+            alert('No payment method selected!');
           }
 
-          const result = await response.json();
-
-          if (result && result.success) {
-            // alert('Order Created!');
-            window.location.href = result.success.data.attributes.checkout_url;
-          } else {
-            throw new Error(result.error || "Failed to add product to cart");
-          }
-
-        }else if(this.paymentMethod == 'cash'){ 
-          console.log('Cash Payment');
-        }else{
-          console.log('No Selected Payment Method!');
+        } else {
+          console.log('No Selected Address.');
         }
-
-
-        // if (this.selectedAddress != 0) {
-        //   const token = localStorage.getItem('token');
-        //   let orderData = [];
-
-        //   this.cartItems.forEach(item => {
-        //     const productTotal = parseFloat(item.product_price) * parseInt(item.quantity);
-
-        //     const addonsTotal = this.addons
-        //         .filter(addon => addon.selected)
-        //         .reduce((total, addon) => {
-        //             return total + (parseFloat(addon.ao_price) * (addon.quantity || 1)); 
-        //         }, 0);
-
-        //     const paymentTotal = (productTotal + addonsTotal).toFixed(2);
-
-        //     let selectedAddons = this.addons
-        //       .filter(addon => addon.selected)
-        //       .map(addon => ({
-        //           name: addon.ao_name,
-        //           price: parseFloat(addon.ao_price), 
-        //           quantity: addon.quantity
-        //       }));
-
-        //     orderData.push({
-        //       user_id: token,
-        //       cart_id: item.cart_id,
-        //       product_id: item.product_id,
-        //       address_id: this.selectedAddress,
-        //       order_qty: item.quantity,
-        //       extra: selectedAddons.length > 0 ? selectedAddons : null,
-        //       payment_method: this.paymentMethod,
-        //       payment_total: paymentTotal,
-        //       payment_status: this.paymentMethod === 'cash' ? 'pending' : 'pending on gcash',
-        //     });
-        //   });
-
-        //   const response = await fetch("http://localhost/raj-express/backend/controller/orderController/add.php", {
-        //     method: "POST",
-        //     headers: {
-        //       "Content-Type": "application/json",
-        //     },
-        //     body: JSON.stringify({ orders: orderData })
-        //   });
-
-        //   if (!response.ok) {
-        //     const errorMessage = await response.text();
-        //     throw new Error(`HTTP error! status: ${response.status}, message: ${errorMessage}`);
-        //   }
-
-        //   const result = await response.json();
-
-        //   if (result && result.success) {
-        //     alert('Order Created!');
-        //   } else {
-        //     throw new Error(result.error || "Failed to add product to cart");
-        //   }
-
-        // } else {
-        //   console.log('No Selected Address.');
-        // }
 
       } catch (error) {
         console.log('Error in ' + error.message);

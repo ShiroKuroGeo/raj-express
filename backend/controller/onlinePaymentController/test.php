@@ -37,15 +37,15 @@ try {
                     "send_email_receipt" => false,
                     "show_description" => true,
                     "show_line_items" => true,
-                    "line_items" => array_map(function($order) {
-                        return [
+                    "line_items" => [
+                        [
                             "currency" => "PHP",
-                            "amount" => $order['onlineTotal'], 
-                            "description" =>  $order['description'],
-                            "name" => $order['name'], 
-                            "quantity" => 1,
-                        ];
-                    }, $data['orders']),
+                            "amount" => $data['orders'][0]['onlineTotal'],
+                            "description" => $data['orders'][0]['description'],
+                            "name" => $data['orders'][0]['name'],
+                            "quantity" => $data['orders'][0]['quantity'],
+                        ]
+                    ],
                     "payment_method_types" => ["gcash"],
                     'success_url' => "http://localhost:9000/#/payment-success/$paymentId",
                     "description" => "test"

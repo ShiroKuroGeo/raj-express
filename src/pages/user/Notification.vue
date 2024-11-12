@@ -8,7 +8,8 @@
     </q-header>
 
     <div class="q-pa-md">
-      <q-card v-for="notification in notifications" :key="notification.id" class="q-mb-md bg-pink-2">
+      <div class="" v-if="notifications.length > 1">
+        <q-card v-for="notification in notifications" :key="notification.id" class="q-mb-md bg-pink-2">
         <q-card-section class="row no-wrap items-center">
           <!-- <q-img
             :src="notification.image"
@@ -22,6 +23,10 @@
           </q-card-section>
         </q-card-section>
       </q-card>
+      </div>
+      <div class="" v-else>
+        No notification
+      </div>
     </div>
   </q-page>
 </template>

@@ -39,6 +39,7 @@ export default {
       { name: 'id', required: true, label: 'Order ID', align: 'left', field: (row) => row.cusref, sortable: true },
       { name: 'customer_info', label: 'Customer Info', field: (row) => row.addressContactPerson },
       { name: 'order_status', label: 'Order Status', field: (row) => row.status },
+      { name: 'payment_status', label: 'Payment Status', field: (row) => row.payment_status },
       { name: 'actions', label: 'Actions', field: 'actions', align: 'center' }
     ]);
 
