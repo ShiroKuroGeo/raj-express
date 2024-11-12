@@ -208,7 +208,8 @@ export default {
             const result = await response.json();
   
             if (result && result.success) {
-              alert('Order Created!');
+              alert('Order sent!');
+              this.$router.push('/home');
             } else {
               throw new Error(result.error || "Failed to add product to cart");
             }

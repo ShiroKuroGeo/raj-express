@@ -45,6 +45,20 @@
               </q-item>
               <q-item>
                 <q-item-section>
+                  <q-item-label caption>Order Payment Status</q-item-label>
+                  <q-item-label class="text-capitalize">
+                    <q-select
+                      v-model="payment_status"
+                      class="q-mt-md text-capitalize"
+                      label="Status"
+                      :options="['pending', 'paid', payment_status]"
+                      filled
+                    />
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section>
                   <q-item-label caption>Order Status</q-item-label>
                   <q-item-label>
                     <q-select
@@ -128,6 +142,7 @@ export default {
       products: [],
       extra: [],
       cusref: '',
+      payment_id: '',
       user_id: '',
       total_orders: '',
       product_names: '',
@@ -204,7 +219,9 @@ export default {
       const token = this.$route.params.id;
       const data = {
         product_id: token,
-        status: this.status
+        status: this.status,
+        payment_id: this.payment_id,
+        payment_status: this.payment_status
       };
       
       const response = await fetch("http://localhost/raj-express/backend/controller/admincontroller/orderController/changeStatusOrderController.php", {

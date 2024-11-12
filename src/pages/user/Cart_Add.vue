@@ -35,9 +35,9 @@
 
       <q-card-actions align="center">
         <q-btn
-          :disable="totalPrice <= 50"
+          :disable="totalPrice < 50"
           color="red"
-          :label="totalPrice <= 50 ? 'Price must 50 above' : 'Add To Cart'"
+          :label="totalPrice < 50 ? 'Price must 50 above' : 'Add To Cart'"
           @click="addToCart"
            style="width: 200px; margin-top: 20px"
         />
@@ -59,11 +59,6 @@ export default {
     const quantity = ref(1)
     const route = useRoute()
     const product = ref([])
-
-    // const addons = ref({
-    //   Rice: { id: 1, price: 10, quantity: 1, selected: false },
-    //   Softdrinks: { id: 2, price: 25, quantity: 1, selected: false }
-    // })
 
     const fetchProduct = async () => {
 

@@ -14,8 +14,14 @@ try {
     $orderStmt->bindParam(":cusref", $data['product_id']); 
     $orderStmt->bindParam(":stat", $data['status']);
     $result = $orderStmt->execute();
-
+    
     if($result){
+        $payQuery = "UPDATE `payments` SET `payment_status`= :paymentStatus WHERE `payment_id` = :payId ";
+        $payStmt = $db->prepare($payQuery);
+        $payStmt->bindParam(":paymentStatus", $data['payment_status']); 
+        $payStmt->bindParam(":payId", $data['payment_id']);
+        $payStmt->execute();
+
         $set->sendJsonResponse(["success" => "Status Change Succesfully!"], 200);
     }else{
         $set->sendJsonResponse(["error" => "Status Change Failed!"], 400);

@@ -109,15 +109,13 @@ export default {
         }
 
         const result = await response.json();
-        console.log(result);
 
         if (result) {
-          $q.notify({
-            color: 'positive',
-            message: result.success
-          })
-        } else {
-          throw new Error(result.error || "Failed to add product to cart");
+          this.$router.back();
+          // $q.notify({
+          //   color: 'positive',
+          //   message: result.success
+          // })
         }
 
 
