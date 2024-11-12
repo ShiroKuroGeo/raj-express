@@ -109,7 +109,6 @@ export default {
         console.log('Error in fetchRateProduct:', error);
       }
     },
-  
     calculateAverageRating(productId) {
       const productRatings = this.ratings.filter(rating => rating.product_id === productId);
       
