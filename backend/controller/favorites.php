@@ -27,7 +27,7 @@ try {
     $database = new Database();
     $db = $database->getDb();
 
-    $query = "SELECT product.product_name, product.product_description, product.product_price, product.product_image, product.product_status FROM `wishlists` as wish INNER JOIN `products` AS product ON wish.product_id = product.product_id WHERE wish.user_id = :user_id";
+    $query = "SELECT product.product_name, product.product_description, product.product_price, product.product_image, product.product_status, product.product_id FROM `wishlists` as wish INNER JOIN `products` AS product ON wish.product_id = product.product_id WHERE wish.user_id = :user_id";
     $stmt = $db->prepare($query);
     $stmt->bindParam(":user_id", $authHeader);
     $stmt->execute();

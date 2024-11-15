@@ -12,13 +12,19 @@
 
         <div v-else>
           <q-list bordered padding>
-            <!-- Kamo na bahala sa frontend ani iapil ang image, product name g kanang uban upat -->
-            <q-item v-for="(favorite, index) in favorites" :key="index" clickable>
-              <q-item-section>{{ favorite.product_name }}</q-item-section>
-              <q-item-section>{{ 'http://localhost/raj-express/backend/' + favorite.product_image }}</q-item-section>
-              <q-item-section>{{ favorite.product_description }}</q-item-section>
-              <q-item-section>{{ favorite.product_status }}</q-item-section>
-            </q-item>
+            <div class="row q-col-gutter-md">
+              <div v-for="(favorite, index) in favorites" :key="index"
+                class="col-xs-6 col-sm-4 col-md-3">
+                <q-card class="product-card cursor-pointer" @click="goToProductDetails(favorite.product_id)">
+                  <q-img :src="'http://localhost/raj-express/backend/uploads/' + favorite.product_image" :ratio="1"
+                    style="height: 150px;" />
+                  <q-card-section>
+                    <div class="text-h6">{{ favorite.product_name }}</div>
+                    <div class="text-h6">{{ favorite.product_price }}</div>
+                  </q-card-section>
+                </q-card>
+              </div>
+            </div>
           </q-list>
         </div>
       </q-page>
@@ -60,12 +66,17 @@
         }
       }
 
+      function goToProductDetails(productId) {
+        router.push({ name: 'productDetails', params: { id: productId } });
+      }
+
       onMounted(() => {
         fetchWishlist()
       })
 
       return {
         favorites,
+        goToProductDetails,
       }
     }
 
