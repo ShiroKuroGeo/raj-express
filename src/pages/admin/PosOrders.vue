@@ -15,8 +15,8 @@
       </template>
       <template v-slot:body-cell-action="props">
         <q-td :props="props" class="">
-          <q-btn color="primary" icon="visibility" size="sm" flat dense @click="viewOrder(props.row.id)"></q-btn>
-          <q-btn color="secondary" icon="print" size="sm" flat dense @click="printOrder(props.row.cusref)"></q-btn>
+          <q-btn color="primary" icon="visibility" size="sm" flat dense @click="viewOrder(props.row.cusref)"></q-btn>
+          <q-btn color="secondary" icon="print" size="sm" flat dense @click="printOrder(props.row.pos_id)"></q-btn>
         </q-td>
       </template>
     </q-table>
@@ -50,6 +50,7 @@ export default {
       try {
         const response = await axios.get('http://localhost/raj-express/backend/controller/adminController/posController/getOrderController.php');
         orders.value = response.data.orders;
+        console.log(response.data.orders);
       } catch (error) {
         console.error('Failed to fetch orders:' + error);
       } finally {

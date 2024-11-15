@@ -9,7 +9,7 @@ $data = $set->setInputData();
 
 try {
     
-    $query = "SELECT pos.quantity, pos.price, pos.status, prod.product_name, prod.product_image, pos.pos_id FROM `order_items` as pos INNER JOIN `products` as prod ON pos.product_id = prod.product_id";
+    $query = "SELECT ord.customer_reference as cusref, pos.quantity, pos.price, pos.status, prod.product_name, prod.product_image, pos.pos_id FROM `order_items` as pos INNER JOIN `products` as prod INNER JOIN `orders` as ord ON pos.product_id = prod.product_id AND pos.order_id = ord.order_id;";
     $stmt = $db->prepare($query);
     $stmt->execute();
 
