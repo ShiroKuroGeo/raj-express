@@ -14,6 +14,18 @@
         </q-card>
       </div>
     </div>
+    
+    <div class="row q-col-gutter-md">
+      <div class="col-md-8 col-sm-12">
+        <q-card>
+          <q-card-section>
+            <div class="text-h6">POS Order Statistics</div>
+            <q-btn-toggle v-model="orderStatsTimeframe" flat stretch toggle-color="primary" :options="[ { label: 'This Month', value: 'month' }, { label: 'This Week', value: 'week' }, { label: 'Today', value: 'day' } ]" />
+            <apexchart type="bar" :options="chartOptions" :series="chartSeries" />
+          </q-card-section>
+        </q-card>
+      </div>
+    </div>
 
     <div class="row q-col-gutter-md q-mt-md">
       <div class="col-md-8 col-sm-12">

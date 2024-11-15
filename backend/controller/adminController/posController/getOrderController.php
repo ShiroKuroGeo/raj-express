@@ -1,6 +1,6 @@
 <?php
-include '../../../../connection/dbconfig.php';
-include '../../../controller.php';
+include '../../../connection/dbconfig.php';
+include '../../controller.php';
 $database = new Database();
 $set = new controller();
 $db = $database->getDb();
@@ -8,15 +8,16 @@ $set->setCorsOrigin();
 $data = $set->setInputData();
 
 try {
-    $query = "SELECT SUM(pay.payment_total) AS total FROM `orders` as ord INNER JOIN `payments` as pay ON ord.payment_id = pay.payment_id WHERE DATE(ord.created_at) = CURRENT_DATE();";
+    
+    $query = "SELECT pos.quantity, pos.price, pos.status, prod.product_name, prod.product_image, pos.pos_id FROM `order_items` as pos INNER JOIN `products` as prod ON pos.product_id = prod.product_id";
     $stmt = $db->prepare($query);
     $stmt->execute();
 
     if ($stmt->rowCount() > 0) {
-        $total = $stmt->fetch(PDO::FETCH_ASSOC);
+        $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $set->sendJsonResponse([
             "success" => true,
-            "total" => $total
+            "orders" => $orders
         ]);
     } else {
         $set->sendJsonResponse(["error" => "Orders not found"], 404);

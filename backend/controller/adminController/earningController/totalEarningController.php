@@ -11,7 +11,7 @@ $startDate = isset($_GET['startDate']) ? $_GET['startDate'] : null;
 $endDate = isset($_GET['endDate']) ? $_GET['endDate'] : null;
 
 try {
-    $query = "SELECT SUM(pay.payment_total) AS total FROM `orders` AS ord INNER JOIN `payments` AS pay ON ord.payment_id = pay.payment_id WHERE ord.status = 'delivered'";
+    $query = "SELECT SUM(pay.payment_total) AS total FROM `orders` AS ord INNER JOIN `payments` AS pay ON ord.payment_id = pay.payment_id WHERE ord.status = 'delivered' OR ord.status = 'over-the-counter'";
 
     if ($startDate && $endDate) {
         $query .= " AND ord.created_at BETWEEN :startDate AND :endDate";

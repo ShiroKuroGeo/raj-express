@@ -15,7 +15,7 @@
             <q-card-section class="text-center">
               <q-icon name="calendar-today" color="primary" size="2rem" />
               <div class="text-h5 q-mt-sm">Today's Expenses</div>
-              <div class="text-subtitle1">${{ expenses.daily.toFixed(2) }}</div>
+              <div class="text-subtitle1">${{ daily }}</div>
             </q-card-section>
           </q-card>
 
@@ -23,7 +23,7 @@
             <q-card-section class="text-center">
               <q-icon name="calendar-month" color="primary" size="2rem" />
               <div class="text-h5 q-mt-sm">This Month's Expenses</div>
-              <div class="text-subtitle1">${{ expenses.monthly.toFixed(2) }}</div>
+              <div class="text-subtitle1">${{ monthly }}</div>
             </q-card-section>
           </q-card>
 
@@ -31,7 +31,7 @@
             <q-card-section class="text-center">
               <q-icon name="calendar-year" color="primary" size="2rem" />
               <div class="text-h5 q-mt-sm">This Year's Expenses</div>
-              <div class="text-subtitle1">${{ expenses.yearly.toFixed(2) }}</div>
+              <div class="text-subtitle1">${{ yearly }}</div>
             </q-card-section>
           </q-card>
         </div>
@@ -46,18 +46,18 @@ import axios from 'axios';
 export default {
   data() {
     return {
-      expenses: {
-        daily: 0,
-        monthly: 0,
-        yearly: 0,
-      },
+      daily: 0,
+      monthly: 0,
+      yearly: 0,
     };
   },
   methods: {
     async fetchExpensesSummary() {
       try {
-        const response = await axios.get('http://localhost/path/to/get_expenses_summary.php');
-        this.expenses = response.data;
+        const response = await axios.get('http://localhost/raj-express/backend/controller/admincontroller/expensesController/getExpensesSummaryController.php');
+        this.daily = response.data.today;
+        this.monthly = response.data.month;
+        this.yearly = response.data.year;
       } catch (error) {
         console.error('Error fetching expenses summary:', error);
       }

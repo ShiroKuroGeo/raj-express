@@ -7,13 +7,12 @@ $set = new controller();
 $db = $database->getDb();
 $set->setCorsOrigin();
 
-// Get startDate and endDate from GET parameters
 $startDate = isset($_GET['startDate']) ? $_GET['startDate'] : null;
 $endDate = isset($_GET['endDate']) ? $_GET['endDate'] : null;
 
 try {
     // Base query
-    $query = "SELECT COUNT(ord.order_id) AS totalOrder, SUM(pay.payment_id) as totalAmount, SUM(ord.order_qty) AS totalQTY FROM `orders` as ord INNER JOIN `payments` as pay ON ord.payment_id = pay.payment_id WHERE ord.status = 'delivered'";
+    $query = "SELECT COUNT(ord.order_id) AS totalOrder, SUM(pay.payment_total) as totalAmount, SUM(ord.order_qty) AS totalQTY FROM `orders` as ord INNER JOIN `payments` as pay ON ord.payment_id = pay.payment_id WHERE ord.status = 'delivered' OR ord.status = 'over-the-counter'";
 
     if ($startDate && $endDate) {
         $query .= " AND `created_at` BETWEEN :startDate AND :endDate";

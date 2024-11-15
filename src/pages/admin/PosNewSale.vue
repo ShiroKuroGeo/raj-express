@@ -211,27 +211,21 @@ export default {
     };
 
     const confirmOrder = async () => {
-      // Tanan nga 1 sa admin
       let orderData = [];
 
       order.value.map(item => {
         orderData.push({
-          order_number: generateOrderNumber(),
-          order_total: totalAmount.value,
-          user_id: 1,
-          extra: null,
-          order_status: 'pending',
-          payment_method: paymentMethod.value,
           product_id: item.id,
-          address_id: 1,
-          order_qty: item.qty,
-          payment_total: item.price* item.qty,
-          name: item.name,
-          payment_status: 'pending',
+          product_name: item.name,
+          quantity: item.qty,
+          price: item.price* item.qty,
+          payment_status: paymentMethod.value,
+          status: 'Paid',
+          extra: '',
         });
       });
-
-      const response = await fetch("http://localhost/raj-express/backend/controller/adminController/orderController/addOrderController.php", {
+      
+      const response = await fetch("http://localhost/raj-express/backend/controller/adminController/posController/addOrderController.php", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -245,6 +239,7 @@ export default {
       }
 
       const result = await response.json();
+      console.log(result);
 
       if (result && result.success) {
         alert('Order Created!');
@@ -252,28 +247,6 @@ export default {
         throw new Error(result.error || "Failed to add product to cart");
       }
       
-      // try {
-      //   console.log('Sending order data:', orderData);
-      //   const response = await axios.post('http://localhost/raj-express/backend/controller/posnewsale.php', orderData);
-      //   console.log('Response from backend:', response.data);
-      //   if (response.data && response.data.success) {
-      //     console.log('Order placed successfully!');
-      //     alert('Order placed successfully!');
-      //     newOrder();
-      //   } else {
-      //     throw new Error(response.data.message || 'Failed to place order');
-      //   }
-      // } catch (error) {
-      //   console.error('Error placing order:', error);
-      //   alert('Failed to place order. Please try again.');
-      // }
-    };
-
-    const generateOrderNumber = () => {
-      const prefix = 'ORD';
-      const timestamp = Date.now().toString();
-      const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-      return `${prefix}-${timestamp}-${random}`;
     };
 
     const formatPrice = (price) => {

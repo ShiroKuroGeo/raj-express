@@ -3,13 +3,14 @@
     <div class="text-h6 q-mb-md">Expenses</div>
     <q-card flat bordered class="q-pa-md">
       <q-card-section>
-        <q-form @submit="addExpense">
+        <q-form>
           <div class="row q-col-gutter-md">
-            <q-input v-model="newExpense.category" label="Category" outlined dense class="col" />
-            <q-input v-model="newExpense.description" label="Description" outlined dense class="col" />
-            <q-input v-model="newExpense.amount" label="Amount" type="number" outlined dense class="col" />
-            <q-input v-model="newExpense.date" label="Date" type="date" outlined dense class="col" />
-            <q-btn type="submit" label="Add Expense" color="primary" class="col-auto" />
+            <q-input v-model="newExpense.category" label="Category" outlined dense class="col-12" />
+            <q-input v-model="newExpense.description" label="Description" outlined dense class="col-12" />
+            <q-input v-model="newExpense.amount" label="Amount" type="number" outlined dense class="col-12" />
+            <q-input v-model="newExpense.date" label="Date" type="date" outlined dense class="col-12" />
+
+            <q-btn type="submit" @click.prevent="addExpenses" label="Add Expense" color="primary" class="col-12 mt-3" />
           </div>
         </q-form>
       </q-card-section>
@@ -47,24 +48,31 @@ export default {
     })
 
     const columns = [
-      { name: 'category', label: 'Category', field: 'expense_category', align: 'left' },
-      { name: 'description', label: 'Description', field: 'description', align: 'left' },
-      { name: 'amount', label: 'Amount', field: 'amount', align: 'right' },
-      { name: 'date', label: 'Date', field: 'expense_date', align: 'left' }
+      { name: 'category', label: 'Category', field: (row) => row.category_name, align: 'left' },
+      { name: 'description', label: 'Description', field: (row) => row.description, align: 'left' },
+      { name: 'amount', label: 'Amount', field: (row) => row.amount, align: 'right' },
+      { name: 'date', label: 'Date', field: (row) => row.date, align: 'right' }
     ]
 
     const fetchExpenses = async () => {
       try {
-        const response = await axios.get('/api/expenses.php')
-        expenses.value = response.data
+        const response = await axios.get('http://localhost/raj-express/backend/controller/admincontroller/expensesController/getExpensesController.php')
+        expenses.value = response.data.total;
       } catch (error) {
         console.error('Failed to fetch expenses:', error)
       }
     }
 
-    const addExpense = async () => {
+    const addExpenses = async () => {
       try {
-        await axios.post('/api/expenses.php', newExpense.value)
+        const FormData = {
+          categoryName: newExpense.value.category,
+          descrip: newExpense.value.description,
+          amount: newExpense.value.amount,
+          dates: newExpense.value.date,
+        };
+
+        await axios.post('http://localhost/raj-express/backend/controller/admincontroller/expensesController/addExpensesController.php', FormData)
         fetchExpenses()
         newExpense.value = { category: '', description: '', amount: '', date: '' }
       } catch (error) {
@@ -80,7 +88,7 @@ export default {
       newExpense,
       columns,
       fetchExpenses,
-      addExpense
+      addExpenses
     }
   }
 }

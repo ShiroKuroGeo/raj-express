@@ -134,9 +134,8 @@ const menuItems = [
       { label: 'Earning Report', icon: 'attach_money', to: '/reports/earnings' },
       { label: 'Order Report', icon: 'receipt', to: '/reports/orders' },
       { label: 'Sale Report', icon: 'money_off', to: '/reports/sale' },
-      // Ayaw na pag add of expenses kay overviewed na kaayo ara ra ni sa dashboard ug sakto nasad to ang naa didto
-      // { label: 'Expenses', icon: 'money_off', to: '/reports/expenses' },
-      // { label: 'Expenses Summary', icon: 'money_off', to: '/reports/summary' }
+      { label: 'Expenses', icon: 'money_off', to: '/reports/expenses' },
+      { label: 'Expenses Summary', icon: 'money_off', to: '/reports/summary' }
     ]
   },
   {
