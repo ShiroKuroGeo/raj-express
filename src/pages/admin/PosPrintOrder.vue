@@ -1,5 +1,5 @@
 <template>
-  <div class="invoice-container" v-if="order">
+  <div class="invoice-container" v-if="orders">
     <div class="invoice-header">
       <p>Print Invoice</p>
     </div>
@@ -13,32 +13,25 @@
       <h5>R.A.J Food express</h5>
       <div class="divider"></div>
       <div class="order-info">
-        <span>Order ID: {{ order.order_number }}</span>
-        <span>{{ formatDate(order.created_at) }}</span>
+        <span>Order ID: <span class="text-uppercase"> {{ cusref }}</span></span>
+        <span>{{ formatDate( first_order_date ) }}</span>
       </div>
       <div class="divider"></div>
-      <table>
-        <thead>
-          <tr>
-            <th>Product Name</th>
-            <th>Price</th>
-            <th>QTY</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="item in order.products" :key="item.product_id">
-
-            <td>{{ item.product_name }}</td>
-            <td>{{ formatCurrency(item.price) }}</td>
-            <td>{{ item.quantity }}</td>
-          </tr>
-        </tbody>
-      </table>
+      <q-card-section>
+        <div class="text-h6">Products Items</div>
+        <q-table :rows="products" :columns="productsON" row-key="name" flat bordered>
+          <template v-slot:body-cell-price="props">
+            <q-td :props="props">
+              {{ formatCurrency(this.props) }}
+            </q-td>
+          </template>
+        </q-table>
+      </q-card-section>
       <div class="divider"></div>
       <div class="order-summary">
-        <p>Total Items: {{ order.total_items }}</p>
-        <p>Paid by: {{ order.payment_method }}</p>
-        <p class="total-amount">Total Amount: {{ formatCurrency(order.order_total) }}</p>
+        <p>Total Items: {{ total_orders }}</p>
+        <p>Paid by: {{ payment_method }}</p>
+        <p class="total-amount">Total Amount: {{ formatCurrency(order_total) }}</p>
       </div>
       <div class="divider"></div>
       <p class="thank-you">"THANK YOU"</p>
@@ -48,42 +41,52 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
 
 export default {
-  name: 'pos-print-order',
-  setup() {
-    const route = useRoute();
-    const router = useRouter();
-    const order = ref(null);
-
-    const fetchOrderDetails = async () => {
-      try {
-        const orderNumber = route.params.id;
-        const response = await axios.get('http://localhost/raj-express/backend/controller/pos_printorders.php', {
-          params: {
-            action: 'get_order_details',
-            order_number: orderNumber
-          }
-        });
-
-        if (response.data && !response.data.error) {
-          order.value = response.data;
-        } else {
-          throw new Error(response.data.error || 'Failed to fetch order details');
-        }
-      } catch (error) {
-        console.error('Error fetching order details:', error);
-        // Handle error (e.g., show an error message to the user)
-      }
+  name: 'PosViewDetails',
+  data() {
+    return {
+      orders: [],
+      products: [],
+      extra: [],
+      cusref: '',
+      payment_id: '',
+      user_id: '',
+      total_orders: '',
+      product_names: '',
+      status: '',
+      first_order_date: '',
+      addressContactPerson: '',
+      addressContactNumber: '',
+      deliveryAddress: '',
+      qty: '',
+      latitude: 0,
+      longitude: 0,
+      streetNumber: '',
+      landmark: '',
+      payment_method: '',
+      total_payment: '',
+      payment_status: '',
+      map: null,
+      addsOns: [
+        { name: 'name', label: 'Adds On', field: (row) => row.name, align: 'left' },
+        { name: 'price', label: 'Price', field: (row) => row.price, align: 'right' },
+        { name: 'quantity', label: 'Quantity', field: (row) => row.quantity, align: 'center' }
+      ],
+      productsON: [
+        { name: 'product_name', label: 'Product Name', field: (row) => row.product_name, align: 'center' },
+        { name: 'product_price', label: 'Price', field: (row) => row.product_price, align: 'center' },
+        { name: 'Quantity', label: 'Quantity', field: (row) => row.qty, align: 'left' },
+      ],
     };
-
-    onMounted(fetchOrderDetails);
-
-    const formatDate = (dateString) => {
-      if (!dateString) return '';
+  },
+  methods: {
+    formatCurrency(value) {
+      const number = parseFloat(value);
+      return isNaN(number) ? '0.00' : number.toFixed(2);
+    },
+    formatDate(dateString) {
       const date = new Date(dateString);
       return date.toLocaleString('en-US', {
         day: '2-digit',
@@ -93,33 +96,40 @@ export default {
         minute: '2-digit',
         hour12: true
       });
-    };
+    },
+    async fetchOrderDetails() {
+      const token = this.$route.params.id;
+      try {
+        const response = await axios.get('http://localhost/raj-express/backend/controller/adminController/orderController/orderDetailsController.php', {
+          headers: { 'Authorization': token }
+        });
+        Object.assign(this, response.data);
+        this.extra = response.data.extra != 'null' || response.data.extra != '' ? JSON.parse(response.data.extra) : 'No Extra';
+      } catch (error) {
+        console.error('Error fetching order details:', error);
+      }
+    },
+    async fetchProduct() {
+      const token = this.$route.params.id;
+      try {
+        const response = await axios.get('http://localhost/raj-express/backend/controller/adminController/orderController/orderDetailsProductController.php', {
+          headers: { 'Authorization': token }
+        });
+        this.products = response.data.orderDetails;
+      } catch (error) {
+        console.error('Error fetching product details:', error);
+      }
+    },
+    goBack() {
+      this.$router.push({ name: 'orders' });
+    },
 
-    const formatCurrency = (value) => {
-      if (value == null) return '';
-      return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'PHP'
-      }).format(value);
-    };
-
-    const printInvoice = () => {
-      window.print();
-    };
-
-    const goBack = () => {
-      router.go(-1);
-    };
-
-    return {
-      order,
-      formatDate,
-      formatCurrency,
-      printInvoice,
-      goBack
-    };
+  },
+  mounted() {
+    this.fetchOrderDetails();
+    this.fetchProduct();
   }
-}
+};
 </script>
 
 
@@ -132,21 +142,25 @@ export default {
   border: 1px solid #ccc;
   font-family: Arial, sans-serif;
 }
+
 .invoice-header {
   text-align: left;
   margin-bottom: 15px;
 }
+
 .invoice-header p {
   margin: 0;
   font-weight: bold;
 }
+
 .button-container {
   display: flex;
   justify-content: space-between;
   margin-bottom: 20px;
 }
+
 .print-button {
-  background-color:#f27c22;
+  background-color: #f27c22;
   color: white;
   border: none;
   padding: 10px 15px;
@@ -155,8 +169,9 @@ export default {
   border-radius: 5px;
   margin-left: 20px;
 }
+
 .back-button {
-  background-color:#ef3a5d;
+  background-color: #ef3a5d;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -167,9 +182,11 @@ export default {
 
 
 }
+
 .invoice-content {
   text-align: center;
 }
+
 .invoice-content h5 {
   margin-bottom: 10px;
   font-weight: bold;
@@ -177,36 +194,46 @@ export default {
   margin-top: 10px;
 
 }
+
 .divider {
   border-top: 1px dashed #000;
   margin: 10px 0;
 }
+
 .order-info {
   display: flex;
   justify-content: space-between;
   margin-bottom: 10px;
 }
+
 table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 10px;
 }
-th, td {
+
+th,
+td {
   border: 1px solid #000;
   padding: 5px;
   text-align: left;
 }
+
 .order-summary {
   text-align: left;
 }
+
 .total-amount {
   font-weight: bold;
 }
+
 .thank-you {
   font-weight: bold;
   margin-top: 10px;
 }
+
 @media print {
+
   /* Hide the header and any other elements you don't want to print */
   .invoice-header,
   .button-container,
@@ -245,5 +272,4 @@ th {
 td {
   vertical-align: top;
 }
-
 </style>

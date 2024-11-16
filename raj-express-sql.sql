@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 15, 2024 at 07:03 AM
+-- Generation Time: Nov 16, 2024 at 10:13 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -36,6 +36,13 @@ CREATE TABLE `addons` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `addons`
+--
+
+INSERT INTO `addons` (`addOn_id`, `ao_name`, `ao_price`, `ao_status`, `created_at`, `updated_at`) VALUES
+(1, 'Coke', 25, 'Available', '2024-11-16 03:14:22', '2024-11-16 03:14:22');
+
 -- --------------------------------------------------------
 
 --
@@ -61,7 +68,8 @@ CREATE TABLE `addresses` (
 --
 
 INSERT INTO `addresses` (`address_id`, `user_id`, `personName`, `phoneNumber`, `latitude`, `longitude`, `deliveryAddress`, `streetNumber`, `landmark`, `created_at`, `updated_at`) VALUES
-(1, 1, 'user', '123123123', '10.311351526406', '123.96130442619', 'sant dominic', '12123', 'basta', '2024-11-12 04:00:49', '2024-11-12 04:00:49');
+(1, 1, 'user', '123123123', '10.311351526406', '123.96130442619', 'sant dominic', '12123', 'basta', '2024-11-12 04:00:49', '2024-11-12 04:00:49'),
+(9, 16, 'Shiro', '9484750030', '10.287853971701', '123.9995098114', 'Basak', 'basak', 'white sand', '2024-11-16 01:50:06', '2024-11-16 01:50:06');
 
 -- --------------------------------------------------------
 
@@ -74,6 +82,7 @@ CREATE TABLE `carts` (
   `product_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `quantity` int(11) NOT NULL,
+  `extra` text DEFAULT NULL,
   `status` enum('pending','order') NOT NULL DEFAULT 'pending',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp()
@@ -83,9 +92,9 @@ CREATE TABLE `carts` (
 -- Dumping data for table `carts`
 --
 
-INSERT INTO `carts` (`cart_id`, `product_id`, `user_id`, `quantity`, `status`, `created_at`, `updated_at`) VALUES
-(1, 32, 16, 2, 'order', '2024-11-12 03:57:12', '2024-11-12 03:57:12'),
-(2, 32, 16, 2, 'order', '2024-11-12 09:52:23', '2024-11-12 09:52:23');
+INSERT INTO `carts` (`cart_id`, `product_id`, `user_id`, `quantity`, `extra`, `status`, `created_at`, `updated_at`) VALUES
+(8, 32, 16, 2, '[{\"name\":\"Coke\",\"price\":25,\"quantity\":1}]', 'order', '2024-11-16 07:53:37', '2024-11-16 07:53:37'),
+(9, 37, 16, 2, '[{\"name\":\"Coke\",\"price\":25,\"quantity\":2}]', 'order', '2024-11-16 07:53:48', '2024-11-16 07:53:48');
 
 -- --------------------------------------------------------
 
@@ -206,7 +215,28 @@ CREATE TABLE `orders` (
 --
 
 INSERT INTO `orders` (`order_id`, `user_id`, `product_id`, `address_id`, `payment_id`, `customer_reference`, `order_qty`, `extra`, `status`, `created_at`, `updated_at`) VALUES
-(94, 1, 32, 1, 99, 'cusord2499', 1, '', 'over-the-counter', '2024-11-15 04:17:18', '2024-11-15 04:17:18');
+(94, 1, 32, 1, 99, 'cusord2499', 1, '', 'over-the-counter', '2024-11-15 04:17:18', '2024-11-15 04:17:18'),
+(95, 1, 32, 1, 100, 'cusord24100', 1, '', 'over-the-counter', '2024-11-16 01:09:44', '2024-11-16 01:09:44'),
+(96, 1, 32, 1, 102, 'cusord24102', 1, '', 'over-the-counter', '2024-11-16 01:17:16', '2024-11-16 01:17:16'),
+(97, 1, 33, 1, 102, 'cusord24102', 1, '', 'over-the-counter', '2024-11-16 01:17:16', '2024-11-16 01:17:16'),
+(98, 1, 32, 1, 103, 'cusord24103', 1, '', 'over-the-counter', '2024-11-16 01:31:08', '2024-11-16 01:31:08'),
+(99, 1, 33, 1, 103, 'cusord24103', 1, '', 'over-the-counter', '2024-11-16 01:31:08', '2024-11-16 01:31:08'),
+(100, 16, 33, 9, 104, 'cusord24104', 1, 'null', 'pending', '2024-11-16 01:50:11', '2024-11-16 01:50:11'),
+(101, 16, 32, 9, 105, 'cusord24105', 2, '[{\"name\":\"Coke\",\"price\":25,\"quantity\":2}]', 'pending', '2024-11-16 04:48:45', '2024-11-16 04:48:45'),
+(104, 16, 32, 9, 107, 'cusord24107', 2, '[{\"name\":\"Coke\",\"price\":25,\"quantity\":1}]', 'pending', '2024-11-16 08:30:49', '2024-11-16 08:30:49'),
+(105, 16, 37, 9, 107, 'cusord24107', 2, '[{\"name\":\"Coke\",\"price\":25,\"quantity\":2}]', 'pending', '2024-11-16 08:30:49', '2024-11-16 08:30:49'),
+(106, 16, 32, 9, 108, 'cusord24108', 2, '[{\"name\":\"Coke\",\"price\":25,\"quantity\":1}]', 'pending', '2024-11-16 08:33:24', '2024-11-16 08:33:24'),
+(107, 16, 37, 9, 108, 'cusord24108', 2, '[{\"name\":\"Coke\",\"price\":25,\"quantity\":2}]', 'pending', '2024-11-16 08:33:24', '2024-11-16 08:33:24'),
+(108, 16, 32, 9, 109, 'cusord24109', 2, '[{\"name\":\"Coke\",\"price\":25,\"quantity\":1}]', 'pending', '2024-11-16 08:35:50', '2024-11-16 08:35:50'),
+(109, 16, 37, 9, 109, 'cusord24109', 2, '[{\"name\":\"Coke\",\"price\":25,\"quantity\":2}]', 'pending', '2024-11-16 08:35:50', '2024-11-16 08:35:50'),
+(110, 16, 32, 9, 114, 'cusord24114', 2, '[{\"name\":\"Coke\",\"price\":25,\"quantity\":1}]', 'pending', '2024-11-16 08:48:43', '2024-11-16 08:48:43'),
+(111, 16, 37, 9, 114, 'cusord24114', 2, '[{\"name\":\"Coke\",\"price\":25,\"quantity\":2}]', 'pending', '2024-11-16 08:48:43', '2024-11-16 08:48:43'),
+(112, 16, 32, 9, 115, 'cusord24115', 2, '[{\"name\":\"Coke\",\"price\":25,\"quantity\":1}]', 'pending', '2024-11-16 08:55:59', '2024-11-16 08:55:59'),
+(113, 16, 37, 9, 115, 'cusord24115', 2, '[{\"name\":\"Coke\",\"price\":25,\"quantity\":2}]', 'pending', '2024-11-16 08:55:59', '2024-11-16 08:55:59'),
+(114, 16, 32, 9, 116, 'cusord24116', 1, 'null', 'pending', '2024-11-16 09:11:29', '2024-11-16 09:11:29'),
+(115, 16, 32, 9, 116, 'cusord24116', 2, '[{\"name\":\"Coke\",\"price\":25,\"quantity\":1}]', 'pending', '2024-11-16 09:11:29', '2024-11-16 09:11:29'),
+(116, 16, 37, 9, 116, 'cusord24116', 2, 'null', 'pending', '2024-11-16 09:11:29', '2024-11-16 09:11:29'),
+(117, 16, 37, 9, 116, 'cusord24116', 2, '[{\"name\":\"Coke\",\"price\":25,\"quantity\":2}]', 'pending', '2024-11-16 09:11:29', '2024-11-16 09:11:29');
 
 -- --------------------------------------------------------
 
@@ -232,7 +262,12 @@ CREATE TABLE `order_items` (
 --
 
 INSERT INTO `order_items` (`pos_id`, `order_id`, `product_id`, `product_name`, `quantity`, `price`, `payment_status`, `status`, `created_at`, `updated_At`) VALUES
-(5, 94, 32, 'Pancit Cantoon', 1, 25, 'Paid', 'cash', '2024-11-15 04:17:18', '2024-11-15 04:17:18');
+(5, 94, 32, 'Pancit Cantoon', 1, 25, 'Paid', 'cash', '2024-11-15 04:17:18', '2024-11-15 04:17:18'),
+(6, 95, 32, 'Pancit Cantoon', 1, 25, 'Paid', 'cash', '2024-11-16 01:09:44', '2024-11-16 01:09:44'),
+(7, 96, 32, 'Pancit Cantoon', 1, 25, 'Paid', 'cash', '2024-11-16 01:17:16', '2024-11-16 01:17:16'),
+(8, 97, 33, 'Shiro Special', 1, 100, 'Paid', 'cash', '2024-11-16 01:17:16', '2024-11-16 01:17:16'),
+(9, 98, 32, 'Pancit Cantoon', 1, 25, 'Paid', 'cash', '2024-11-16 01:31:08', '2024-11-16 01:31:08'),
+(10, 99, 33, 'Shiro Special', 1, 100, 'Paid', 'cash', '2024-11-16 01:31:08', '2024-11-16 01:31:08');
 
 -- --------------------------------------------------------
 
@@ -269,7 +304,24 @@ INSERT INTO `payments` (`payment_id`, `user_id`, `payment_method`, `payment_tota
 (96, 1, 'walk-in', 25, 'over-the-counter'),
 (97, 1, 'walk-in', 25, 'over-the-counter'),
 (98, 1, 'walk-in', 25, 'over-the-counter'),
-(99, 1, 'walk-in', 25, 'over-the-counter');
+(99, 1, 'walk-in', 25, 'over-the-counter'),
+(100, 1, 'walk-in', 25, 'over-the-counter'),
+(101, 1, 'walk-in', 25, 'over-the-counter'),
+(102, 1, 'walk-in', 25, 'over-the-counter'),
+(103, 1, 'walk-in', 25, 'over-the-counter'),
+(104, 16, 'cash', 100, 'pending'),
+(105, 16, 'cash', 100, 'pending'),
+(106, 16, 'cash', 50, 'pending'),
+(107, 16, 'online', 50, 'pending on gcash'),
+(108, 16, 'online', 50, 'pending on gcash'),
+(109, 16, 'online', 50, 'pending on gcash'),
+(110, 16, 'online', 50, 'pending on gcash'),
+(111, 16, 'online', 50, 'pending on gcash'),
+(112, 16, 'online', 50, 'pending on gcash'),
+(113, 16, 'online', 50, 'pending on gcash'),
+(114, 16, 'online', 50, 'pending on gcash'),
+(115, 16, 'online', 50, 'pending on gcash'),
+(116, 16, 'online', 50, 'Paid on Online');
 
 -- --------------------------------------------------------
 
@@ -280,6 +332,7 @@ INSERT INTO `payments` (`payment_id`, `user_id`, `payment_method`, `payment_tota
 CREATE TABLE `products` (
   `product_id` int(11) NOT NULL,
   `category_id` int(11) NOT NULL,
+  `addon_id` int(11) NOT NULL,
   `product_name` varchar(255) NOT NULL,
   `product_description` text NOT NULL,
   `product_price` decimal(10,2) NOT NULL,
@@ -293,8 +346,9 @@ CREATE TABLE `products` (
 -- Dumping data for table `products`
 --
 
-INSERT INTO `products` (`product_id`, `category_id`, `product_name`, `product_description`, `product_price`, `product_status`, `product_image`, `created_at`, `updated_at`) VALUES
-(32, 17, 'Pancit Cantoon', 'This is pancit cantoon.', 25.00, 'Available', '6732d17db6592_pancit Cantoon.png', '2024-11-12 03:54:37', '2024-11-12 03:54:37');
+INSERT INTO `products` (`product_id`, `category_id`, `addon_id`, `product_name`, `product_description`, `product_price`, `product_status`, `product_image`, `created_at`, `updated_at`) VALUES
+(32, 17, 1, 'Pancit Cantoon', 'This is pancit cantoon.', 25.00, 'Available', '6732d17db6592_pancit Cantoon.png', '2024-11-12 03:54:37', '2024-11-16 05:50:56'),
+(37, 17, 1, 'Barbeque', 'This barbeque has original taste.', 15.00, 'Available', '67384267bc57a_barbeque.png', '2024-11-16 06:57:43', '2024-11-16 06:57:43');
 
 -- --------------------------------------------------------
 
@@ -466,19 +520,19 @@ ALTER TABLE `wishlists`
 -- AUTO_INCREMENT for table `addons`
 --
 ALTER TABLE `addons`
-  MODIFY `addOn_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `addOn_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `addresses`
 --
 ALTER TABLE `addresses`
-  MODIFY `address_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `address_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `carts`
 --
 ALTER TABLE `carts`
-  MODIFY `cart_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `cart_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `categories`
@@ -508,25 +562,25 @@ ALTER TABLE `notifications`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=95;
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=118;
 
 --
 -- AUTO_INCREMENT for table `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `pos_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `pos_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `payments`
 --
 ALTER TABLE `payments`
-  MODIFY `payment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=100;
+  MODIFY `payment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=117;
 
 --
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `product_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
+  MODIFY `product_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
 -- AUTO_INCREMENT for table `ratings`

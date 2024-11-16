@@ -40,15 +40,17 @@ try {
                     "line_items" => array_map(function($order) {
                         return [
                             "currency" => "PHP",
-                            "amount" => $order['onlineTotal'], 
-                            "description" =>  $order['description'],
+                            "amount" => $order['productTotal'], 
+                            "description" => $order['description'],
                             "name" => $order['name'], 
-                            "quantity" => 1,
+                            "quantity" => $order['quantity'],
                         ];
                     }, $data['orders']),
+                    "amount" => $data['orders'][0]['onlineTotal'],
+                    "currency" => "PHP",
                     "payment_method_types" => ["gcash"],
                     'success_url' => "http://localhost:9000/#/payment-success/$paymentId",
-                    "description" => "test"
+                    "description" => "Custom total amount set manually for GCash",
                 ]
             ]
         ]),

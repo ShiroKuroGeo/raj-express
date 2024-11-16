@@ -31,6 +31,7 @@ const routes = [
       { path: 'details/:id', name: 'pos-order-details', component: () => import('pages/admin/PosViewDetails.vue') },
       { path: 'products', name: 'products', component: () => import('pages/admin/PosProducts.vue') },
       { path: 'print-order/:id', name: 'pos-print-order', component: () => import('pages/admin/PosPrintOrder.vue') },
+      { path: 'pos-sale', component: () => import('pages/admin/PosOrderSales.vue') },
     ]
   },
   {
@@ -53,6 +54,7 @@ const routes = [
       { path: 'add', component: () => import('pages/admin/Product_Add_U.vue') }, // NewSale route
       { path: 'list', component: () => import('pages/admin/Product_List_U.vue') },
       { path: 'categories', component: () => import('pages/admin/Product_Category_U.vue') },
+      { path: 'extras', component: () => import('pages/admin/Product_Extra_U.vue') },
       { path: 'reviews', component: () => import('pages/admin/Product_Reviews_U.vue') },
     ],
   },
@@ -81,7 +83,7 @@ const routes = [
     children: [
       { path: 'customers', component: () => import('pages/admin/Customer_List.vue') },
       { path: 'invoices', component: () => import('pages/admin/Customer_Invioce.vue') },
-      { path: 'customer-orders', component: () => import('pages/admin/Customer_viewOrders.vue') },
+      { path: 'customer-orders/:id', name: 'customerOrderDetails', component: () => import('pages/admin/Customer_viewOrders.vue') },
       { path: 'customer-details/:id', name: 'CustomerDetails', component: () => import('pages/admin/Customer_Details.vue') },
     ],
   },

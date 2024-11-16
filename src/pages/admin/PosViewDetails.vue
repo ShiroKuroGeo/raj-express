@@ -43,34 +43,6 @@
                   <q-item-label>{{ total_payment ? formatCurrency(total_payment) : 'N/A' }}</q-item-label>
                 </q-item-section>
               </q-item>
-              <q-item>
-                <q-item-section>
-                  <q-item-label caption>Order Payment Status</q-item-label>
-                  <q-item-label class="text-capitalize">
-                    <q-select
-                      v-model="payment_status"
-                      class="q-mt-md text-capitalize"
-                      label="Status"
-                      :options="['pending', 'paid', payment_status]"
-                      filled
-                    />
-                  </q-item-label>
-                </q-item-section>
-              </q-item>
-              <q-item>
-                <q-item-section>
-                  <q-item-label caption>Order Status</q-item-label>
-                  <q-item-label>
-                    <q-select
-                      v-model="status"
-                      label="Status"
-                      :options="['pending', 'confirm', 'processing', 'delivered', 'returned', 'canceled']"
-                      filled
-                      class="q-mt-md text-capitalize"
-                    />
-                  </q-item-label>
-                </q-item-section>
-              </q-item>
             </q-list>
           </div>
         </div>
@@ -93,36 +65,8 @@
         </q-table>
       </q-card-section>
 
-      <!-- Adds On Items Table -->
-      <q-card-section>
-        <div class="text-h6">Adds On Items</div>
-        <q-table :rows="extra" :columns="addsOns" row-key="name" flat bordered>
-          <template v-slot:body-cell-price="props">
-            <q-td :props="props">
-              {{ formatCurrency(props.row.price) }}
-            </q-td>
-          </template>
-        </q-table>
-      </q-card-section>
-
-      <!-- Delivery Address and Map -->
-      <q-card-section>
-        <div class="row q-col-gutter-md">
-          <div class="col-12">
-            <q-card flat bordered>
-              <q-card-section>
-                <div class="text-h6">Delivery Address</div>
-                <div id="map" style="position: relative; height: 400px; width: 100%;"></div>
-              </q-card-section>
-            </q-card>
-          </div>
-        </div>
-      </q-card-section>
-
-      <!-- Actions -->
       <q-card-actions align="right">
         <q-btn flat color="primary" label="Back" @click="goBack" />
-        <q-btn color="primary" label="Save Status" @click="changeStatus" />
         <q-btn color="primary" label="Print" @click="printOrder" />
       </q-card-actions>
     </q-card>

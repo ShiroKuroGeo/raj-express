@@ -191,7 +191,7 @@
       <q-card>
         <q-card-section class="row items-center">
           <q-avatar icon="delete" color="red" text-color="white" />
-          <span class="q-ml-sm">Are you sure you want to delete this product?</span>
+          <span class="q-ml-sm">Are you sure you want to delete this productsss?</span>
         </q-card-section>
 
         <q-card-actions align="right">
@@ -390,9 +390,6 @@ export default {
     closeDialog() {
       this.dialogVisible = false;
     },
-
-
-
     resetForm() {
       this.product = {
         product_id: '',
@@ -427,26 +424,17 @@ export default {
 
     async deleteProduct() {
       if (!this.productToDelete) return;
-
+      
       try {
-        const response = await axios.post('http://localhost/raj-express/backend/controller/pos_product.php', {
-          action: 'delete',
-          product_id: this.productToDelete.product_id
-        });
+        const data = {
+          product_id:  this.productToDelete.product_id
+        }
+        const response = await axios.post('http://localhost/raj-express/backend/controller/deleteProduct.php',data);
 
-        if (response.data.success) {
-          // Remove the product from the local array
-          const index = this.products.findIndex(p => p.product_id === this.productToDelete.product_id);
-          if (index !== -1) {
-            this.products.splice(index, 1);
-          }
-          this.$q.notify({
-            color: 'positive',
-            message: 'Product deleted successfully',
-            icon: 'check'
-          });
-        } else {
-          throw new Error(response.data.message || 'Failed to delete product');
+        if(response.data.message){
+          alert(response.data.message);
+        }else{
+          alert('Something is wrong in deleting data!');
         }
       } catch (error) {
         console.error('Error deleting product:', error);

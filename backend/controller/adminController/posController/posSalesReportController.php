@@ -1,20 +1,21 @@
 <?php
 include '../../../connection/dbconfig.php';
 include '../../controller.php';
+
 $database = new Database();
 $set = new controller();
 $db = $database->getDb();
 $set->setCorsOrigin();
-$data = $set->setInputData();
 
 $startDate = isset($_GET['startDate']) ? $_GET['startDate'] : null;
 $endDate = isset($_GET['endDate']) ? $_GET['endDate'] : null;
 
 try {
-    $query = "SELECT SUM(pay.payment_total) AS total FROM `orders` AS ord INNER JOIN `payments` AS pay ON ord.payment_id = pay.payment_id WHERE ord.status = 'delivered'";
+    // Base query
+    $query = "SELECT COUNT(ord.order_id) AS totalOrder, SUM(pay.payment_total) as totalAmount, SUM(ord.order_qty) AS totalQTY FROM `orders` as ord INNER JOIN `payments` as pay ON ord.payment_id = pay.payment_id WHERE ord.status = 'over-the-counter'";
 
     if ($startDate && $endDate) {
-        $query .= " AND ord.created_at BETWEEN :startDate AND :endDate";
+        $query .= " AND `created_at` BETWEEN :startDate AND :endDate";
     }
 
     $stmt = $db->prepare($query);
@@ -27,15 +28,18 @@ try {
     $stmt->execute();
 
     if ($stmt->rowCount() > 0) {
-        $total = $stmt->fetch(PDO::FETCH_ASSOC);
+        $orders = $stmt->fetch(PDO::FETCH_ASSOC); 
         $set->sendJsonResponse([
             "success" => true,
-            "total" => $total
+            "totalOrder" => $orders['totalOrder'],
+            "totalAmount" => $orders['totalAmount'],
+            "totalQTY" => $orders['totalQTY'],
         ]);
     } else {
-        $set->sendJsonResponse(["error" => "No data found for the given date range"], 404);
+        $set->sendJsonResponse(["error" => "Orders not found"], 404);
     }
 
 } catch (PDOException $e) {
     $set->sendJsonResponse(["error" => "Database error: " . $e->getMessage()], 500);
 }
+

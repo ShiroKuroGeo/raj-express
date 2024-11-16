@@ -94,7 +94,7 @@ const menuItems = [
     children: [
       { label: 'New Sale', icon: 'point_of_sale', to: '/pos/new-sale' },
       { label: 'Order History', icon: 'receipt', to: '/pos/orders' },
-      { label: 'Reports', icon: 'assessment', to: '/pos/reports' }
+      { label: 'Reports', icon: 'assessment', to: '/pos/pos-sale' }
     ]
   },
   {
@@ -117,6 +117,7 @@ const menuItems = [
       { label: 'Add Product', icon: 'add_box', to: '/products/add' },
       { label: 'Product List', icon: 'list', to: '/products/list' },
       { label: 'Categories', icon: 'category', to: '/products/categories' },
+      { label: 'Extras', icon: 'category', to: '/products/extras' },
       { label: 'Product Reviews', icon: 'reviews', to: '/products/reviews' }
     ]
   },

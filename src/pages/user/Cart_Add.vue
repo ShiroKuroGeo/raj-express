@@ -1,6 +1,3 @@
-// kani kay sa tanan product nga add cart sir. kanang ang customer sir ba
-// kay dili ka place order kong 50 ra ilang total-amount
-
 <template>
   <q-page padding>
     <q-card class="my-card">
@@ -30,6 +27,26 @@
       </q-card-section>
 
       <q-card-section>
+        <div class="text-subtitle2">Add ons</div>
+        <q-list>
+            <q-item v-for="(addon, key) in addons" :key="addon.id">
+                <q-item-section avatar>
+                    <q-checkbox v-model="addon.selected" />
+                </q-item-section>
+                <q-item-section>{{ addon.ao_name }}</q-item-section>
+                <q-item-section side>₱ {{ addon.ao_price }}</q-item-section>
+                <q-item-section side>
+                    <q-btn-group flat>
+                        <q-btn flat round icon="remove" @click="changeQuantity(key, -1)" :disable="!addon.selected || addon.quantity === 0" />
+                        <q-btn flat disable>{{ addon.quantity }}</q-btn>
+                        <q-btn flat round icon="add" @click="changeQuantity(key, 1)" :disable="!addon.selected" />
+                    </q-btn-group>
+                </q-item-section>
+            </q-item>
+        </q-list>
+      </q-card-section>
+
+      <q-card-section>
         <div class="text-subtitle1">Total: ₱ {{ totalPrice }}</div>
       </q-card-section>
 
@@ -49,31 +66,27 @@
 <script>
 import { ref, computed, onMounted } from 'vue'
 import { useQuasar } from 'quasar'
-import { useRouter, useRoute } from 'vue-router'
 import axios from 'axios'
 
 export default {
-  setup() {
-    const $q = useQuasar()
-    const router = useRouter()
-    const quantity = ref(1)
-    const route = useRoute()
-    const product = ref([])
-
-    const fetchProduct = async () => {
-
+  data(){
+    return{
+      quantity: 1,
+      product: [],
+      addons: [],
+    }
+  },
+  methods:{
+    async fetchProduct (){
       try {
-
         const response = await axios.get('http://localhost/raj-express/backend/controller/productView.php', {
           headers: {
-            'Authorization': route.params.id
+            'Authorization': this.$route.params.id
           }
         });
-
         const data = response.success;
-
         if(!data){
-          product.value = {
+          this.product = {
             id: response.data.product_id,
             name: response.data.product_name,
             price: response.data.product_price,
@@ -84,34 +97,19 @@ export default {
         }else{
           throw new Error(data.error || 'Failed to fetch products data');
         }
-
         } catch (error) {
-        console.error('Error fetching specials:', error)
+          console.error('Error fetching specials:', error)
         }
-
-    }
-
-    
-
-    const updateQuantity = (change) => {
-      quantity.value = Math.max(1, quantity.value + change);
-    };
-
-    
-    const totalPrice = computed(() => {
-      let total = parseFloat(product.value.price) * quantity.value;
-
-      return total;
-    })
-
-    
-
-    const addToWishlist = async () => {
+    },
+    updateQuantity (change) {
+      this.quantity = Math.max(1, this.quantity + change);
+    },
+    async addToWishlist () {
       try {
         const token = localStorage.getItem('token');
 
         const addToCartData = {
-          product_id: route.params.id,
+          product_id: this.$route.params.id,
           user_id: token,
         };
 
@@ -132,10 +130,11 @@ export default {
         console.log(result);
 
         if (result) {
-          $q.notify({
-            color: 'positive',
-            message: result.success
-          })
+          alert('Success');
+          // $q.notify({
+          //   color: 'positive',
+          //   message: result.success
+          // })
         } else {
           throw new Error(result.error || "Failed to add product to cart");
         }
@@ -143,17 +142,25 @@ export default {
       } catch (error) {
         console.error("Error adding to cart:", error.message || error);
       }
-    }
-
-    const addToCart = async () => {
+    },
+    async addToCart () {
 
       try {
         const token = localStorage.getItem('token');
 
+        let selectedAddons = this.addons
+          .filter(addon => addon.selected)
+          .map(addon => ({
+              name: addon.ao_name,
+              price: parseFloat(addon.ao_price), 
+              quantity: addon.quantity
+          }));
+
         const addToCartData = {
-          product_id: route.params.id,
+          product_id: this.$route.params.id,
           user_id: token,
-          quantity: quantity.value,
+          quantity: this.quantity,
+          extra: selectedAddons,
           pending: 'pending'
         };
 
@@ -174,10 +181,11 @@ export default {
         console.log(result);
 
         if (result) {
-          $q.notify({
-            color: 'positive',
-            message: result.success
-          })
+          alert('Success');
+          // $q.notify({
+          //   color: 'positive',
+          //   message: result.success
+          // })
         } else {
           throw new Error(result.error || "Failed to add product to cart");
         }
@@ -185,24 +193,48 @@ export default {
       } catch (error) {
         console.error("Error adding to cart:", error.message || error);
       }
-    }
+    },
+    goBack(){
+      this.$router.back();
+    },
+    changeQuantity(index, delta) {
+        const addon = this.addons[index];
+        
+        if (addon.selected) {
+            addon.quantity = Math.max(0, addon.quantity + delta);
+        }
+    },
+    async fetchAddsOn(){
+      try {
+        const response = await axios.get('http://localhost/raj-express/backend/controller/addOnController/get.php');
+        const data = response.data;
 
-    const goBack = () => {
-      router.go(-1)
-    }
+        this.addons = data.addOnsItems.map(item => ({
+          ...item,
+          selected: false, 
+          quantity: 1
+        }));
 
-    onMounted(fetchProduct)
-
-    return {
-      product,
-      addToCart,
-      quantity,
-      totalPrice,
-      addToWishlist,
-      updateQuantity,
-      addToCart,
-      goBack
+      } catch (error) {
+        console.error('Error fetching specials:', error);
+      }
     }
+  },
+  created(){
+    this.fetchProduct();
+    this.fetchAddsOn();
+  },
+  computed: {
+    totalPrice() {
+      const productTotal = parseFloat(this.product?.price) * this.quantity;
+      const addOnsTotal = this.addons.reduce((sum, addon) => {
+        if (addon.selected) {
+          return sum + (parseInt(addon.ao_price) * addon.quantity);
+        }
+        return sum;
+      }, 0);
+      return productTotal + addOnsTotal;
+  }
   }
 }
 </script>

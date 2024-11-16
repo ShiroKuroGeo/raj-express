@@ -224,7 +224,7 @@ export default {
           extra: '',
         });
       });
-      
+
       const response = await fetch("http://localhost/raj-express/backend/controller/adminController/posController/addOrderController.php", {
         method: "POST",
         headers: {

@@ -11,7 +11,7 @@ $authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : 8;
 
 try {
     
-    $query = "SELECT prod.product_id, prod.product_name, prod.product_price, prod.product_image FROM `orders` as ord INNER JOIN `products` AS prod ON ord.product_id = prod.product_id WHERE ord.customer_reference = :order_id;";
+    $query = "SELECT prod.product_id, prod.product_name, prod.product_price, prod.product_image, ord.order_qty as qty FROM `orders` as ord INNER JOIN `products` AS prod ON ord.product_id = prod.product_id WHERE ord.customer_reference = :order_id;";
     $stmt = $db->prepare($query);
     $stmt->bindParam(':order_id', $authHeader);
     $stmt->execute();

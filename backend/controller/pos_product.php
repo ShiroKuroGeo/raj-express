@@ -39,6 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validate and sanitize input
     $category_id = filter_input(INPUT_POST, 'category_id', FILTER_SANITIZE_NUMBER_INT);
+    $addon_id = filter_input(INPUT_POST, 'addon_id', FILTER_SANITIZE_NUMBER_INT);
     $product_name = filter_input(INPUT_POST, 'product_name', FILTER_SANITIZE_STRING);
     $product_description = filter_input(INPUT_POST, 'product_description', FILTER_SANITIZE_STRING);
     $product_price = filter_input(INPUT_POST, 'product_price', FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
@@ -47,6 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     // Log sanitized data
     error_log("Sanitized data: " . json_encode([
         'category_id' => $category_id,
+        'addon_id' => $addon_id,
         'product_name' => $product_name,
         'product_description' => $product_description,
         'product_price' => $product_price,
@@ -84,12 +86,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
         if ($isUpdate) {
             // Update existing product
-            $stmt = $pdo->prepare("UPDATE products SET category_id = ?, product_name = ?, product_description = ?, product_price = ?, product_status = ? WHERE product_id = ?");
-            $result = $stmt->execute([$data['category_id'], $data['product_name'], $data['product_description'], $data['product_price'], $data['product_status'], $data['product_id']]);
+            $stmt = $pdo->prepare("UPDATE products SET category_id = ?, addon_id = ?, product_name = ?, product_description = ?, product_price = ?, product_status = ? WHERE product_id = ?");
+            $result = $stmt->execute([$data['category_id'], $data['addon_id'], $data['product_name'], $data['product_description'], $data['product_price'], $data['product_status'], $data['product_id']]);
         } else {
             // Add new product
-            $stmt = $pdo->prepare("INSERT INTO products (category_id, product_name, product_description, product_price, product_status) VALUES (?, ?, ?, ?, ?)");
-            $result = $stmt->execute([$data['category_id'], $data['product_name'], $data['product_description'], $data['product_price'], $data['product_status']]);
+            $stmt = $pdo->prepare("INSERT INTO products (category_id, addon_id ,product_name, product_description, product_price, product_status) VALUES (?, ?, ?, ?, ?, ?)");
+            $result = $stmt->execute([$data['category_id'], $data['addon_id'], $data['product_name'], $data['product_description'], $data['product_price'], $data['product_status']]);
         }
 
         if (!$result) {
@@ -142,14 +144,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($data['action']) && $data['action'] === 'delete') {
         $product_id = $data['product_id'];
 
-        // Perform the delete operation
-        $stmt = $pdo->prepare("DELETE FROM products WHERE product_id = ?");
+        $stmt = $pdo->prepare("DELETE FROM `products` WHERE `product_id` = ?");
         $result = $stmt->execute([$product_id]);
 
         if ($result) {
             echo json_encode(['success' => true, 'message' => 'Product deleted successfully']);
         } else {
-            echo json_encode(['success' => false, 'message' => 'Failed to delete product']);
+            echo json_encode(['success' => false, 'message' => $product_id]);
         }
         exit;
     }

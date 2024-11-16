@@ -47,7 +47,8 @@ export default {
       loading.value = true;
       try {
         const response = await axios.get('http://localhost/raj-express/backend/controller/adminController/orderController/allOrderControllerDelivered.php');
-        orders.value = response.data.orders;
+        const filteredOrders = response.data.orders.filter(order => order.payment_status !== 'over-the-counter');
+        orders.value = filteredOrders;
       } catch (error) {
         console.error('Failed to fetch orders:' + error);
       } finally {
@@ -56,7 +57,7 @@ export default {
     };
 
     const viewOrder = (orderId) => {
-      router.push({ name: 'pos-order-details', params: { id: orderId } });
+      router.push({ name: 'customerOrderDetails', params: { id: orderId } });
     };
 
     const printOrder = (orderId) => {

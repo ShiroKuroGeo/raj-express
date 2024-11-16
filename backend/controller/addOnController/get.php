@@ -7,9 +7,6 @@ $set->setCorsOrigin();
 
 $data = $set->setInputData();
 
-$headers = apache_request_headers();
-$authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : '';
-
 include "../../connection/dbconfig.php"; 
 
 try {

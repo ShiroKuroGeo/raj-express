@@ -26,6 +26,27 @@
               </q-item>
             </template>
           </q-select>
+          
+          <q-select
+            v-model="product.addon_id"
+            :options="AddsOnOptions"
+            :option-value="AddsOnOptions.addOn_id"
+            :option-label="AddsOnOptions.ao_name"
+            emit-value
+            map-options
+            label="Adds On"
+            outlined
+            :rules="[val => !!val || 'Add Ons is required']"
+            class="q-mb-md"
+          >
+            <template v-slot:no-option>
+              <q-item>
+                <q-item-section class="text-grey">
+                  No results
+                </q-item-section>
+              </q-item>
+            </template>
+          </q-select>
 
           <!-- Product Name Input -->
           <q-input
@@ -99,28 +120,28 @@ export default {
     return {
       product: {
         product_id: null,
-        category_id: null, // Change this to null instead of an empty string
-        product_name: '',
-        product_description: '',
+        addon_id: null,
+        category_id: null, 
+        product_name: null,
+        product_description: null,
         product_price: 0,
         product_status: 'Available',
         product_image: null,
       },
-      categoryOptions: [], // Changed from categories to categoryOptions
+      categoryOptions: [],
+      AddsOnOptions: [],
     };
   },
   methods: {
-    // Fetch categories from the backend
     async fetchCategories() {
       try {
         const response = await axios.get('http://localhost/raj-express/backend/controller/pos_categories.php');
-        console.log('API response:', response.data); // Log the entire response
         if (response.data && Array.isArray(response.data.categories)) {
           this.categoryOptions = response.data.categories.map(category => ({
             label: category.category_name,
-            value: parseInt(category.category_id, 10), // Ensure category_id is a number
+            value: parseInt(category.category_id, 10), 
           }));
-          console.log('Category options:', this.categoryOptions); // Log to check fetched categories
+          console.log('Category options:', this.categoryOptions); 
         } else {
           console.error('Unexpected response format:', response.data);
           this.categoryOptions = [];
@@ -134,14 +155,30 @@ export default {
       }
     },
 
-    // Handle image upload
+    async fetchAddOns (){
+      try {
+        const response = await axios.get('http://localhost/raj-express/backend/controller/addOnController/get.php');
+        // console.log(response.data.addOnsItems);
+        if (response.data && Array.isArray(response.data.addOnsItems)) {
+          this.AddsOnOptions = response.data.addOnsItems.map(addOns => ({
+            label: addOns.ao_name,
+            value: parseInt(addOns.addOn_id, 10), 
+          })); 
+        } else {
+          console.error('Unexpected response format:', response.data);
+          this.addOnsAddsOnOptionsOptions = [];
+        }
+      } catch (error) { 
+          console.log('Error in ' + error);
+      }
+    },
+    
     handleImageUpload(file) {
       if (file && file.length > 0) {
         this.product.product_image = file[0]; // Store the uploaded image file
       }
     },
 
-    // Save product and handle image upload
     async saveProduct() {
       console.log('Product object before saving:', JSON.stringify(this.product, null, 2));
 
@@ -153,7 +190,6 @@ export default {
       const formData = new FormData();
       for (const key in this.product) {
         if (this.product[key] !== null && this.product[key] !== undefined && this.product[key] !== '') {
-          // For category_id, ensure we're sending the value, not the entire object
           if (key === 'category_id') {
             formData.append(key, this.product[key].value);
           } else {
@@ -197,6 +233,7 @@ export default {
           console.error('Error setting up request:', error.message);
         }
         alert('Error saving product. Check console for details.');
+        console.log('Error in ' + error);
       }
     },
 
@@ -226,10 +263,9 @@ export default {
       };
     },
   },
-
-  // Fetch categories when the component is mounted
-  mounted() {
+  created() {
     this.fetchCategories();
+    this.fetchAddOns();
   },
 };
 </script>

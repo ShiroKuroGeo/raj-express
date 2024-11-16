@@ -37,11 +37,10 @@ export default {
     
     const columns = ref([
       { name: 'id', required: true, label: 'Order ID', align: 'center', field: (row) => row.pos_id, sortable: true },
-      { name: 'ProductImage', label: 'Product Image', align: 'center', field: (row) => row.product_image },
-      { name: 'ProductName', label: 'Product Name', align: 'center', field: (row) => row.product_name },
-      { name: 'quantity', label: 'Order Quantity', align: 'center', field: (row) => row.quantity },
+      { name: 'customer', label: 'Customer', align: 'center', field: () => 'Walk-in Customer'},
       { name: 'price', label: 'Order Price', align: 'center', field: (row) => row.price },
-      { name: 'status', label: 'Order Status', align: 'center', field: (row) => row.status },
+      { name: 'paymentMethod', label: 'Payment Method', align: 'center', field: (row) => row.status },
+      { name: 'date', label: 'Date', align: 'center', field: (row) => row.created_at },
       { name: 'action', label: 'action', align: 'center', field: 'actions' },
     ]);
 

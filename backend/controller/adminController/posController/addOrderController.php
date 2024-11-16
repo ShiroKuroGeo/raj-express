@@ -49,12 +49,10 @@ try {
             $orderItemStmt->bindParam(":stat", $order['status']);
             $orderItemStmt->execute();
 
-            $set->sendJsonResponse(["success" => "Order by admin done!"], 200);
         } else {
             $set->sendJsonResponse(["error" => "Failed to create payment record."], 409);
         }
     }
 } catch (PDOException $e) {
     $set->sendJsonResponse(["error" => "Database error: " . $e->getMessage()], 500);
-    exit;
 }

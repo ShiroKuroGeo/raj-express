@@ -5,7 +5,6 @@
         <!-- Title -->
         <div class="text-center text-h6 q-mt-md">My Order</div>
 
-        <!-- Tabs for Ongoing and History Orders -->
         <q-tabs v-model="tab" class="q-mt-md q-mb-md" active-color="red" indicator-color="red" align="center" dense>
           <q-tab name="ongoing" label="Ongoing" />
           <q-tab name="history" label="History" />
@@ -34,10 +33,8 @@
           </div>
         </q-page>
 
-        <!-- History Orders -->
         <q-page v-if="tab === 'history'">
           <div v-if="historyOrders.length">
-            <!-- List of history orders -->
             <q-list bordered>
               <q-item v-for="order in historyOrders" :key="order.id" clickable @click="viewOrderDetails(order.id)">
                 <q-item-section avatar>

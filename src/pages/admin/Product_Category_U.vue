@@ -1,13 +1,13 @@
 <template>
   <q-page class="q-pa-md">
-    <q-card >
+    <q-card>
       <q-card-section>
         <div class="text-h4">Category List</div>
       </q-card-section>
 
       <q-card-section>
         <div class="q-gutter-md row items-center">
-          <q-btn  label="Add" icon="add" color="orange" class="q-ml-md q-ml-auto" @click="openAddCategoryDialog" />
+          <q-btn label="Add" icon="add" color="orange" class="q-ml-md q-ml-auto" @click="openAddCategoryDialog" />
           <q-input v-model="searchQuery" placeholder="Search" filled>
             <template v-slot:append>
               <q-icon name="search" />
@@ -15,66 +15,39 @@
           </q-input>
         </div>
       </q-card-section>
-            <q-card-section>
-              <q-table
-                :rows="filteredCategories"
-                :columns="columns"
-                row-key="category_id"
-                :rows-per-page-options="[10]"
-                @request="onRequest"
-                  dense
-              >
-                <template v-slot:body-cell-category_status="props">
-                  <q-td :props="props" class="text-center">
-                    <q-chip
-                      :color="props.row.category_status === 'Active' ? 'green' : 'red'"
-                      text-color="white"
-                      square
-                    >
-                    {{ props.row.category_status }}
-                    </q-chip>
-                  </q-td>
-                </template>
+      <q-card-section>
+        <q-table :rows="filteredCategories" :columns="columns" row-key="category_id" :rows-per-page-options="[10]"
+          @request="onRequest" dense>
+          <template v-slot:body-cell-category_status="props">
+            <q-td :props="props" class="text-center">
+              <q-chip :color="props.row.category_status === 'Active' ? 'green' : 'red'" text-color="white" square>
+                {{ props.row.category_status }}
+              </q-chip>
+            </q-td>
+          </template>
 
-                <template v-slot:body-cell-action="props">
-                  <q-td :props="props" class="text-center">
-                      <q-btn
-                        flat
-                        dense
-                        icon="edit"
-                        color="orange"
-                        @click="openEditCategoryDialog(props.row) "
-                      />
-                      <q-btn
-                        flat
-                        dense
-                        icon="delete"
-                        color="red"
-                        @click="deleteCategory(props.row.category_id)"
-                      />
-                  </q-td>
-                </template>
-              </q-table>
-               </q-card-section>
-            </q-card>
+          <template v-slot:body-cell-action="props">
+            <q-td :props="props" class="text-center">
+              <q-btn flat dense icon="edit" color="orange" @click="openEditCategoryDialog(props.row)" />
+              <q-btn flat dense icon="delete" color="red" @click="deleteCategory(props.row.category_id)" />
+            </q-td>
+          </template>
+        </q-table>
+      </q-card-section>
+    </q-card>
 
-               <!-- Dialog for Add/Edit Category -->
-            <q-dialog v-model="dialogVisible">
-              <q-card>
-                <q-card-section>
-                  <div class="text-h6">{{ isEdit ? 'Edit Category' : 'Add New Category' }}</div>
-                </q-card-section>
+    <!-- Dialog for Add/Edit Category -->
+    <q-dialog v-model="dialogVisible">
+      <q-card>
+        <q-card-section>
+          <div class="text-h6">{{ isEdit ? 'Edit Category' : 'Add New Category' }}</div>
+        </q-card-section>
 
-                <q-card-section>
-                  <q-input v-model="category.category_name" label="Category Name" outlined />
-                  <q-select
-                  v-model="category.category_status"
-                  label="Status"
-                  :options="['Active', 'Inactive']"
-                  filled
-                  class="q-mt-md"
-                  />
-                </q-card-section>
+        <q-card-section>
+          <q-input v-model="category.category_name" label="Category Name" outlined />
+          <q-select v-model="category.category_status" label="Status" :options="['Active', 'Inactive']" filled
+            class="q-mt-md" />
+        </q-card-section>
 
         <q-card-actions align="right">
           <q-btn flat label="Cancel" color="grey" @click="closeDialog" />
@@ -98,7 +71,7 @@ export default {
       searchQuery: '',
       columns: [
         { name: 'category_id', label: 'ID', align: 'left', field: 'category_id' },
-        { name:'category_name', label: 'Name', align: 'left', field: 'category_name' },
+        { name: 'category_name', label: 'Name', align: 'left', field: 'category_name' },
         { name: 'category_status', label: 'Status', align: 'center', field: 'category_status' },
         { name: 'action', label: 'Action', align: 'center' }
       ],
@@ -151,7 +124,7 @@ export default {
     },
     openAddCategoryDialog() {
       this.isEdit = false;
-      this.category = { category_id: null, category_name: '',category_status:''};
+      this.category = { category_id: null, category_name: '', category_status: '' };
       this.dialogVisible = true;
     },
 
@@ -221,4 +194,3 @@ export default {
   padding: 20px;
 }
 </style>
-
