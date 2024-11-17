@@ -421,40 +421,26 @@ export default {
     },
 
     async deleteProduct() {
-      console.log(this.productToDelete.product_id);
-      // if (!this.productToDelete) return;
+      if (!this.productToDelete) return;
+      
+      try {
+        const data = {
+          product_id:  this.productToDelete.product_id
+        }
+        const response = await axios.post('http://localhost/raj-express/backend/controller/deleteProduct.php',data);
 
-      // try {
-      //   const response = await axios.post('http://localhost/raj-express/backend/controller/pos_product.php', {
-      //     action: 'delete',
-      //     product_id: this.productToDelete.product_id
-      //   });
-
-      //   if (response.data.success) {
-      //     // Remove the product from the local array
-      //     const index = this.products.findIndex(p => p.product_id === this.productToDelete.product_id);
-      //     if (index !== -1) {
-      //       this.products.splice(index, 1);
-      //     }
-      //     this.$q.notify({
-      //       color: 'positive',
-      //       message: 'Product deleted successfully',
-      //       icon: 'check'
-      //     });
-      //   } else {
-      //     throw new Error(response.data.message || 'Failed to delete product');
-      //   }
-      // } catch (error) {
-      //   console.error('Error deleting product:', error);
-      //   this.$q.notify({
-      //     color: 'negative',
-      //     message: 'Failed to delete product',
-      //     icon: 'error'
-      //   });
-      // } finally {
-      //   this.productToDelete = null;
-      //   this.deleteDialogVisible = false;
-      // }
+        alert('Success');
+      } catch (error) {
+        console.error('Error deleting product:', error);
+        this.$q.notify({
+          color: 'negative',
+          message: 'Failed to delete product',
+          icon: 'error'
+        });
+      } finally {
+        this.productToDelete = null;
+        this.deleteDialogVisible = false;
+      }
     },
   },
   created() {
