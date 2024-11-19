@@ -15,8 +15,8 @@
           <q-icon :name="darkMode ? 'brightness_4' : 'brightness_7'" />
         </q-btn>
 
+        <q-btn flat clickable @click="notification"><q-icon name="notifications" /><small>({{ notifAll.length }})</small></q-btn>
         <div>
-          <q-btn flat>{{ userFirstName }}</q-btn>
           <q-btn flat round @click="toggleMenu">
             <q-avatar>
               <img src="https://cdn.quasar.dev/img/avatar.png" alt="avatar" />
@@ -82,9 +82,10 @@
 </template>
 
 <script>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
+import axios from 'axios'
 
 const menuItems = [
   { label: 'Dashboard', icon: 'dashboard', to: '/dashboard' },
@@ -149,6 +150,7 @@ const menuItems = [
 ]
 
 export default {
+  
   name: 'MainLayout',
   setup() {
     const $q = useQuasar()
@@ -158,9 +160,10 @@ export default {
     const menu = ref(false)
     const darkMode = ref($q.dark.isActive)
     const searchQuery = ref('')
+    const notifAll = ref([])
 
     const userFirstName = computed(() => {
-      return localStorage.getItem('userFirstName') || 'User'
+      return localStorage.getItem('userFirstName') || 'Raj'
     })
 
     const drawerBgClass = computed(() => {
@@ -199,6 +202,24 @@ export default {
       menu.value = false
     }
 
+    const notification = () => {
+      router.push('/notifications')
+    }
+
+    const notificationHandle = async () =>{
+      try {
+        const token = 1;
+        const response = await axios.get('http://localhost/raj-express/backend/controller/notificationController/getNotifController.php',{
+          headers:{
+            'Authorization': token
+          }
+        });
+        notifAll.value = response.data.notifs;
+      } catch (error) {
+        console.log('Error in ' + error);
+      }
+    }
+
     const handleLogout = () => {
       router.push('/')
       menu.value = false
@@ -208,15 +229,19 @@ export default {
       searchQuery.value = query
     }
 
+    onMounted(notificationHandle)
+
     return {
       drawer,
       menu,
       darkMode,
       userFirstName,
       drawerBgClass,
+      notifAll,
       searchQuery,
       filteredMenuItems,
       toggleDrawer,
+      notification,
       toggleMenu,
       toggleDarkMode,
       goToSettings,

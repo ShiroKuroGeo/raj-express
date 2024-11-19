@@ -18,6 +18,7 @@ const routes = [
       { path: '/admin-dashboard', component: () => import('pages/admin/Dashboard.vue') },
       { path: '/dashboard', component: () => import('pages/admin/Dashboard.vue') },
       { path: '/settings', component: () => import('pages/admin/Settings.vue') },
+      { path: '/notifications', component: () => import('pages/admin/Notification.vue') },
     ],
   },
   {

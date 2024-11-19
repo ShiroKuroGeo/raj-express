@@ -35,7 +35,7 @@
             <div class="text-subtitle1">{{ item.product_name }} <small>x</small>{{ item.quantity }}</div>
 
             <div class="text-h6">₱ {{ parseInt(item.product_price) }}</div>
-            <div class="">Adds On {{ item.extra }}</div>
+            <div class="" v-for="ex in item.extra">Adds On - {{ ex.name }} - (P {{ ex.price }}.00)</div>
             <div class="">Total Amount: {{ parseInt(item.product_price * item.quantity) }}
             </div>
           </q-card-section>
@@ -66,7 +66,8 @@
         </div>
       </div>
 
-      <q-btn class="full-width q-mt-lg" color="red" label="Place Order" @click="placeOrder" />
+      <q-btn v-if="isNightTime" disabled class="full-width q-mt-lg" color="red" label="We're Closed" @click="placeOrder" />
+      <q-btn v-else class="full-width q-mt-lg" color="red" label="Place Order" @click="placeOrder" />
     </div>
   </q-page>
 </template>
@@ -81,6 +82,7 @@ export default {
   data() {
     return {
       address: '',
+      isNightTime: false,
       paymentMethod: 'cash',
       paymentOptions: [{ label: 'Cash on Delivery', value: 'cash' }, { label: 'Online Payment', value: 'online' }],
       cartItems: [],
@@ -96,6 +98,15 @@ export default {
     },
     selectedIdForAddress(id) {
       this.selectedAddress = id;
+    },
+    checkTimeRange() {
+      const now = new Date();
+      const phTime = new Date(
+        now.toLocaleString("en-US", { timeZone: "Asia/Manila" })
+      );
+
+      const hour = phTime.getHours(); 
+      this.isNightTime = hour >= 20 || hour < 6;
     },
     async fetchCartItems() {
       try {
@@ -133,6 +144,39 @@ export default {
       } catch (error) {
         console.error('Error fetching addresses:', error)
       }
+    },
+    async setNotitication(result){
+      const content = 'Order Placed';
+      const notificationData = {
+        user_id: 1,
+        customer_ref: 'placedOrder',
+        content: content
+      };
+
+      try{
+        const response = await fetch("http://localhost/raj-express/backend/controller/admincontroller/notificationController/setNotificationController.php", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(notificationData)
+        });
+
+        if(response.status == 200){
+          if(result == 1){
+            alert('Order Placed!');
+            this.$router.push('/home');
+          }else{
+            window.location.href = result;
+          }
+        }else{
+          alert('The status is : '+response.status);
+        }
+
+      }catch(error){
+        console.log('Error in '+ error);
+      }
+
     },
     async placeOrder() {
       try {
@@ -184,8 +228,8 @@ export default {
             const result = await response.json();
   
             if (result && result.success) {
-              alert('Order sent!');
-              this.$router.push('/home');
+              const home = 1;
+              this.setNotitication(home);
             } else {
               throw new Error(result.error || "Failed to add product to cart");
             }
@@ -265,8 +309,8 @@ export default {
                 const result = await response.json();
 
                 if (result && result.success) {
-                    alert('You are redirected to PayMongo for online payment!');
-                    window.location.href = result.success;
+                    // alert('You are redirected to PayMongo for online payment!');
+                    this.setNotitication(result.success);
                 } else {
                     throw new Error(result.error || "Failed to add product to cart or missing checkout URL");
                 }
@@ -321,6 +365,8 @@ export default {
   created() {
     this.fetchAddresses();
     this.fetchCartItems();
+    this.checkTimeRange();
+    setInterval(this.checkTimeRange, 60000);
   }
 
 }

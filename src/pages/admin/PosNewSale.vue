@@ -233,19 +233,7 @@ export default {
         body: JSON.stringify({ orders: orderData })
       });
 
-      if (!response.ok) {
-        const errorMessage = await response.text();
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorMessage}`);
-      }
-
-      const result = await response.json();
-      console.log(result);
-
-      if (result && result.success) {
-        alert('Order Created!');
-      } else {
-        throw new Error(result.error || "Failed to add product to cart");
-      }
+      alert('Success Order!');
       
     };
 
