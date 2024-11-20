@@ -43,7 +43,7 @@
                   <q-item-label>{{ total_payment ? formatCurrency(total_payment) : 'N/A' }}</q-item-label>
                 </q-item-section>
               </q-item>
-              <!-- <q-item>
+              <q-item>
                 <q-item-section>
                   <q-item-label caption>Order Payment Status</q-item-label>
                   <q-item-label class="text-capitalize">
@@ -56,8 +56,8 @@
                     />
                   </q-item-label>
                 </q-item-section>
-              </q-item> -->
-              <!-- <q-item>
+              </q-item>
+              <q-item>
                 <q-item-section>
                   <q-item-label caption>Order Status</q-item-label>
                   <q-item-label>
@@ -70,7 +70,7 @@
                     />
                   </q-item-label>
                 </q-item-section>
-              </q-item> -->
+              </q-item>
             </q-list>
           </div>
         </div>

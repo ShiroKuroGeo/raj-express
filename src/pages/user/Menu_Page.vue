@@ -8,7 +8,8 @@
         <!-- Profile Card -->
         <q-card class="my-card q-pa-lg q-mb-md">
           <div class="profile-container">
-            <q-avatar size="56px" color="red" icon="person" />
+            <!-- <q-avatar size="56px" color="red" icon="person" /> -->
+            <img :src="profilePicture ? `http://localhost/raj-express/backend/uploads/${profilePicture}` : `http://localhost/raj-express/backend/uploads/profile.jpg`">
             <div class="profile-info q-ml-md">
               <div class="profile-name">{{ profile.fullName || 'Loading...' }}</div>
               <div class="profile-email">{{ profile.email || 'Loading...' }}</div>
@@ -107,6 +108,7 @@ export default {
       fullName: '',
       email: ''
     });
+    const profilePicture = ref(null);
 
     const fetchUserData = async () => {
       try {
@@ -122,13 +124,13 @@ export default {
         });
 
         const data = response.data;
-
+        console.log(data);
         if (data) {
           profile.value = {
             fullName: `${data.first_name} ${data.last_name}`,
             email: data.email
           };
-
+          profilePicture.value = data.profile_img;
         } else {
           throw new Error(data.error || 'Failed to fetch user data');
         }
@@ -204,6 +206,7 @@ export default {
     return {
       darkMode,
       profile,
+      profilePicture,
       toggleDarkMode,
       goToProfile,
       goToOrder,

@@ -49,9 +49,7 @@
             No ratings available.
           </div>
           <div v-for="(item, index) in ratings" :key="index" class="comment" style="border: 1px solid black; margin: 5px; padding: 5px">
-            <strong>Profile:</strong><img :src="'http://localhost/raj-express/backend/uploads/' + item.profile_img" height="50" width="50" alt=""><br>
             <strong>User:</strong> {{ item.last_name }}, {{ item.first_name }} <br>
-            <strong>Contact Number:</strong> {{ item.contact_number }}<br>
             <strong>Rate:</strong> {{ item.feedback }} <br>
             <strong>Comment:</strong> {{ item.fb_description }}
           </div>

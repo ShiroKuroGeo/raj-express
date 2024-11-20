@@ -4,13 +4,18 @@ const routes = [
     path: '/',
     component: () => import('pages/Login.vue')
   },
-
   {
     path: '/register',
     component: () => import('pages/Register.vue')
   },
-
-
+  {
+    path: '/reset-password',
+    component: () => import('pages/reset.vue')
+  },
+  {
+    path: '/change-password/:token',
+    component: () => import('pages/resetpassword.vue')
+  },
   {
     path: '/admin',
     component: () => import('layouts/AdminLayout.vue'),
@@ -95,8 +100,9 @@ const routes = [
       { path: '/home', name: 'home', component: () => import('pages/user/Home_Page.vue') },
       { path: '/product-details/:id', name: 'productDetails', component: () => import('pages/user/Product_View.vue') },
       { path: '/favorites', name: 'favorites', component: () => import('pages/user/Hearts_Page.vue') },
-      { path: '/cart', component: () => import('pages/user/Cart_Page.vue') },
+      { path: '/cart', component: () => import('src/pages/user/Cart_Page.vue') },
       { path: '/add-cart/:id', name: 'addProduct', component: () => import('pages/user/Cart_Add.vue') },
+      { path: '/update-cart/:id', name: 'updateProduct', component: () => import('pages/user/Cart_Update.vue') },
       { path: '/cart-not-empty', component: () => import('pages/user/Cart_NotEmpty.vue') },
       { path: '/place-order', name: 'placeOrder', component: () => import('pages/user/Place_order.vue') },
       { path: '/order', name: 'order', component: () => import('pages/user/Order_Page.vue') },

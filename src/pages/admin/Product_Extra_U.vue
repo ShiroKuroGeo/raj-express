@@ -116,7 +116,7 @@ export default {
         });
         
         if(response.data.success){
-          fetchAddsOns();
+          this.fetchAddsOns();
         }else{
           alert('Data not added');
         }
@@ -148,7 +148,7 @@ export default {
     }
   },
 
-  mounted() {
+  created() {
     this.fetchAddsOns();
   }
 };

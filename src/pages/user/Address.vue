@@ -123,6 +123,33 @@ export default {
         console.log('Error in ' . error);
       }
     },
+    async userInformation (){
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('No auth token found');
+        }
+
+        const response = await axios.get('http://localhost/raj-express/backend/controller/profile.php', {
+          headers: {
+            'Authorization': `${token}`
+          }
+        });
+
+        const data = response.data;
+
+        console.log(data);
+        if (data) {
+
+          this.personName = data.first_name +" "+ data.last_name;
+          this.phoneNumber = data.phoneNumber;
+        } else {
+          throw new Error(data.error || 'Failed to fetch user data');
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    },
     async checkIfThereIsAlreadyAnAddress (){
       try{
         const token = localStorage.getItem('token');
@@ -181,6 +208,7 @@ export default {
   },
   mounted() {
     this.markMap();
+    this.userInformation();
     this.checkIfThereIsAlreadyAnAddress();
   },
 }

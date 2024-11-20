@@ -29,7 +29,7 @@ try {
     $database = new Database();
     $db = $database->getDb();
 
-    $query = "SELECT first_name, last_name, email FROM users WHERE user_id = :user_id";
+    $query = "SELECT first_name, last_name, email, profile_img, contact_number FROM users WHERE user_id = :user_id";
     $stmt = $db->prepare($query);
     $stmt->bindParam(":user_id", $userId);
     $stmt->execute();
@@ -40,6 +40,8 @@ try {
             "success" => true,
             "first_name" => $user['first_name'],
             "last_name" => $user['last_name'],
+            "profile_img" => $user['profile_img'],
+            "phoneNumber" => $user['contact_number'],
             "email" => $user['email']
         ]);
     } else {
