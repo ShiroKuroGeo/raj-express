@@ -221,29 +221,27 @@ export default {
               });
             });
 
-            console.log(orderData);
-
-            // const response = await fetch("http://localhost/raj-express/backend/controller/orderController/add.php", {
-            //   method: "POST",
-            //   headers: {
-            //     "Content-Type": "application/json",
-            //   },
-            //   body: JSON.stringify({ orders: orderData })
-            // });
+            const response = await fetch("http://localhost/raj-express/backend/controller/orderController/add.php", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ orders: orderData })
+            });
   
-            // if (!response.ok) {
-            //   const errorMessage = await response.text();
-            //   throw new Error(`HTTP error! status: ${response.status}, message: ${errorMessage}`);
-            // }
+            if (!response.ok) {
+              const errorMessage = await response.text();
+              throw new Error(`HTTP error! status: ${response.status}, message: ${errorMessage}`);
+            }
   
-            // const result = await response.json();
+            const result = await response.json();
   
-            // if (result && result.success) {
-            //   const home = 1;
-            //   this.setNotitication(home);
-            // } else {
-            //   throw new Error(result.error || "Failed to add product to cart");
-            // }
+            if (result && result.success) {
+              const home = 1;
+              this.setNotitication(home);
+            } else {
+              throw new Error(result.error || "Failed to add product to cart");
+            }
           }
           else if(this.paymentMethod === 'online'){
             const token = localStorage.getItem('token');
@@ -413,8 +411,8 @@ export default {
   created() {
     this.fetchAddresses();
     this.fetchCartItems();
-    this.checkTimeRange();
-    setInterval(this.checkTimeRange, 60000);
+    // this.checkTimeRange();
+    // setInterval(this.checkTimeRange, 60000);
   }
 
 }

@@ -84,6 +84,8 @@ export default {
   },
   methods: {
     async fetchCartItems() {
+      this.loading = true; // Set loading state to true while fetching
+
       try {
         const token = localStorage.getItem('token');
         const response = await axios.get('http://localhost/raj-express/backend/controller/cartController/get.php', {
@@ -91,15 +93,37 @@ export default {
             'Authorization': token
           }
         });
-        const data = response.data;
-        this.cartItems = data.cartItems.map(item => ({
-          ...item,
-          quantity: item.quantity || 1,
-          rating: item.average_rating || 5.0,
-          price: parseFloat(item.price || 0)
-        }));
+
+        // Check if response data is valid and contains cartItems
+        if (response.data && response.data.cartItems && response.data.cartItems.length > 0) {
+          const data = response.data;
+          this.cartItems = data.cartItems.map(item => ({
+            ...item,
+            quantity: item.quantity || 1,
+            rating: item.average_rating || 5.0,
+            price: parseFloat(item.price || 0)
+          }));
+          this.error = false; // Reset any previous error flag
+        } else {
+          // If no items are found in the cart
+          this.error = true;
+          this.errorMessage = 'Your cart is empty.';
+        }
       } catch (error) {
-        console.error('Error fetching cart items:', error);
+        // Handle different types of errors
+        this.error = true;
+        if (error.response) {
+          // Server-side error (e.g., 500, 404)
+          this.errorMessage = `Error: ${error.response.status} - ${error.response.data.message || 'Something went wrong'}`;
+        } else if (error.request) {
+          // No response from server (e.g., network issue)
+          this.errorMessage = 'Network error: Could not reach the server.';
+        } else {
+          // Any other error
+          this.errorMessage = `An error occurred: ${error.message}`;
+        }
+      } finally {
+        this.loading = false; // Stop loading once the request completes
       }
     },
     calculateTotalPrice(item) {

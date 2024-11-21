@@ -31,6 +31,16 @@
           <div id="map" style="height: 500px;"></div>
           <q-input v-model="latitude" v-show="hide" label="Latitude" filled class="q-mt-md" />
           <q-input v-model="longitude" v-show="hide" label="Longitude" filled class="q-mt-md" />
+          <q-input outlined v-model="landmark" label="Land Mark">
+            <template v-slot:prepend>
+              <q-icon name="home" />
+            </template>
+          </q-input>
+          <q-input outlined v-model="streetNumber" label="Street Number">
+            <template v-slot:prepend>
+              <q-icon name="home" />
+            </template>
+          </q-input>
           <q-select
             outlined
             v-model="deliveryAddress"
@@ -43,16 +53,6 @@
               <q-icon name="place" />
             </template>
           </q-select>
-          <q-input outlined v-model="streetNumber" label="Street Number">
-            <template v-slot:prepend>
-              <q-icon name="home" />
-            </template>
-          </q-input>
-          <q-input outlined v-model="landmark" label="Land Mark">
-            <template v-slot:prepend>
-              <q-icon name="home" />
-            </template>
-          </q-input>
         </q-card-section>
       </q-card>
 

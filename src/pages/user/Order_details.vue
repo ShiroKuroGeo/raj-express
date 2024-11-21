@@ -96,6 +96,7 @@
       <q-card-actions align="right">
         <q-btn flat color="primary" label="Back" @click="goBack" />
         <q-btn color="red" label="Rate Product" @click="rateProduct(product_id)" />
+        <!-- <q-btn color="blue" label="Print" @click="printOrder" /> -->
       </q-card-actions>
     </q-card>
   </q-page>
@@ -121,24 +122,6 @@ export default {
       total_payment: null,
       total_amount_product: null,
       grandTotal: null,
-      // cusref: '',
-      // total_orders: '',
-      // product_names: '',
-      // status: '',
-      // first_order_date: '',
-      // addressContactPerson: '',
-      // addressContactNumber: '',
-      // deliveryAddress: '',
-      // latitude: 0,
-      // longitude: 0,
-      // streetNumber: '',
-      // landmark: '',
-      // payment_method: '',
-      // payment_status: '',
-      // product_id: null,
-      // address_id: null,
-      // payment_id: null,
-      // user_id: null,
       map: null,
       addsOns: [
         { name: 'name', label: 'Adds On', field: (row) => row.name, align: 'left' },
@@ -262,11 +245,6 @@ export default {
       });
     },
     mapMark() {
-      if (!this.latitude || !this.longitude) {
-        console.error('Invalid latitude or longitude values.');
-        return;
-      }
-
       if (this.map) {
         this.map.remove();
       }
@@ -312,7 +290,9 @@ export default {
     this.fetchOrderDetails();
     this.fetchProduct();
     this.fetchAddress();
-    this.mapMark();
+    if (this.latitude || this.longitude) {
+      this.mapMark();
+    }
   },
 
   computed: {

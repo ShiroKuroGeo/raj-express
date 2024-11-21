@@ -36,7 +36,7 @@
       </q-toolbar>
     </q-header>
 
-    <q-drawer v-model="drawer" width="250" bordered :class="drawerBgClass">
+    <q-drawer v-model="drawer" :width="250" bordered :class="drawerBgClass">
       <q-list padding>
         <q-item>
           <q-input

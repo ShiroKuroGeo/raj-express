@@ -90,7 +90,6 @@
         </q-table>
       </q-card-section>
 
-      <!-- Adds On Items Table -->
       <q-card-section>
         <div class="text-h6">Adds On Items</div>
         <q-table :rows="allExtraCombine" :columns="addsOns" row-key="name" flat bordered>
@@ -314,10 +313,6 @@ export default {
       });
     },
     mapMark() {
-      if (!this.latitude || !this.longitude) {
-        console.error('Invalid latitude or longitude values.');
-        return;
-      }
 
       if (this.map) {
         this.map.remove();
@@ -364,7 +359,10 @@ export default {
     this.fetchOrderDetails();
     this.fetchProduct();
     this.fetchAddress();
-    this.mapMark();
+    
+    if (this.latitude || this.longitude) {
+      this.mapMark();
+    }
   },
 
   computed: {
