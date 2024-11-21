@@ -101,7 +101,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
 .q-toolbar {
   min-height: 70px;
 }

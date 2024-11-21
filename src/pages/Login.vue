@@ -117,6 +117,8 @@ export default {
             lastName: response.data.last_name,
             userType: response.data.user_type,
           }));
+          
+          localStorage.setItem('token', response.data.user_id);
 
           // Redirect based on user type
           if (response.data.user_type === 'admin') {
@@ -130,7 +132,6 @@ export default {
             });
           }
 
-          localStorage.setItem('token', response.data.user_id);
         } else {
           throw new Error(response.data.error || 'Login failed');
         }

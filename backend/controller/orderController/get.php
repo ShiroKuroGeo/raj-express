@@ -16,11 +16,8 @@ try {
     $database = new Database();
     $db = $database->getDb();
 
-    $query = "SELECT ord.order_id as id, ord.order_qty as qty, ord.extra, ord.status as orderStatus, pro.product_name as name, 
-    pro.product_image as img, pro.product_price as price, pay.payment_method, pay.payment_total, pay.payment_status FROM 
-    `orders` as ord INNER JOIN `users` as us INNER JOIN `products` as pro INNER JOIN `addresses` as 
-    addr INNER JOIN `payments` AS pay ON ord.user_id = us.user_id AND ord.product_id = pro.product_id AND 
-    ord.address_id = addr.address_id AND ord.payment_id = pay.payment_id WHERE ord.user_id = :user_id AND ord.status = 'pending'";
+    $query = "SELECT ord.customer_reference AS reference, SUM(pay.payment_total) AS totalPayment, GROUP_CONCAT(pro.product_name) AS product_names, GROUP_CONCAT(pro.product_image) AS product_images, ord.status AS orderStatus, ord.extra, ord.order_id as id, pay.payment_method, pay.payment_status FROM `orders` AS ord INNER JOIN `users` AS us ON ord.user_id = us.user_id INNER JOIN `products` AS pro ON ord.product_id = pro.product_id INNER JOIN `addresses` AS addr ON ord.address_id = addr.address_id INNER JOIN `payments` AS pay ON ord.payment_id = pay.payment_id WHERE ord.user_id = :user_id AND ord.status = 'pending' GROUP BY ord.customer_reference";
+
     $stmt = $db->prepare($query);
     $stmt->bindParam(":user_id", $authHeader);
     $stmt->execute();

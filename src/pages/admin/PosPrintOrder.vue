@@ -14,7 +14,7 @@
       <div class="divider"></div>
       <div class="order-info">
         <span>Order ID: <span class="text-uppercase"> {{ cusref }}</span></span>
-        <span>{{ formatDate( first_order_date ) }}</span>
+        <span>{{ formatDate( createdAt ) }}</span>
       </div>
       <div class="divider"></div>
       <q-card-section>
@@ -27,11 +27,25 @@
           </template>
         </q-table>
       </q-card-section>
+      <q-card-section>
+        <div class="text-h6">AddsOn Items</div>
+        <q-table :rows="allExtraCombine" :columns="addsOns" row-key="name" flat bordered>
+          <template v-slot:body-cell-price="props">
+            <q-td :props="props">
+              {{ formatCurrency(props.row.price) }}
+            </q-td>
+          </template>
+        </q-table>
+      </q-card-section>
       <div class="divider"></div>
+      {{ grandTotal + total_amount_product + totalShippingItems(deliveryAddress) }}
       <div class="order-summary">
-        <p>Total Items: {{ total_orders }}</p>
-        <p>Paid by: {{ payment_method }}</p>
-        <p class="total-amount">Total Amount: {{ formatCurrency(order_total) }}</p>
+        <p>Product Total: {{ total_amount_product }}</p>
+        <p>Adds On: {{ grandTotal }}</p>
+        <p v-if="paymentStatus === 'over-the-counter'">Shipping Fee:  0</p>
+        <p v-else>Shipping Fee:  {{ totalShippingItems(deliveryAddress) }}</p>
+        <p class="total-amount" v-if="paymentStatus === 'over-the-counter'">Total Amount: {{ grandTotal + total_amount_product }}</p>
+        <p class="total-amount" v-else>Total Amount: {{ grandTotal + total_amount_product + totalShippingItems(deliveryAddress) }}</p>
       </div>
       <div class="divider"></div>
       <p class="thank-you">"THANK YOU"</p>
@@ -42,33 +56,28 @@
 
 <script>
 import axios from 'axios';
+import L from 'leaflet';
 
 export default {
-  name: 'PosViewDetails',
+  name: 'ViewDetails',
   data() {
     return {
       orders: [],
+      printData: [],
       products: [],
       extra: [],
-      cusref: '',
-      payment_id: '',
-      user_id: '',
-      total_orders: '',
-      product_names: '',
-      status: '',
-      first_order_date: '',
-      addressContactPerson: '',
-      addressContactNumber: '',
-      deliveryAddress: '',
-      qty: '',
-      latitude: 0,
-      longitude: 0,
-      streetNumber: '',
-      landmark: '',
-      payment_method: '',
-      total_payment: '',
-      payment_status: '',
+      allExtraCombine: [],
+      latitude: null,
+      longitude: null,
+      deliveryAddress: null,
+      streetNumber: null,
+      landmark: null,
+      total_payment: null,
+      total_amount_product: null,
+      grandTotal: null,
       map: null,
+      payment_status: null,
+      status: null,
       addsOns: [
         { name: 'name', label: 'Adds On', field: (row) => row.name, align: 'left' },
         { name: 'price', label: 'Price', field: (row) => row.price, align: 'right' },
@@ -77,11 +86,14 @@ export default {
       productsON: [
         { name: 'product_name', label: 'Product Name', field: (row) => row.product_name, align: 'center' },
         { name: 'product_price', label: 'Price', field: (row) => row.product_price, align: 'center' },
-        { name: 'Quantity', label: 'Quantity', field: (row) => row.qty, align: 'left' },
+        { name: 'product_quantity', label: 'Quantity', field: (row) => row.qty, align: 'center' },
       ],
     };
   },
   methods: {
+    rateProduct(id) {
+      this.$router.push({ name: 'productRating', params: { id } });
+    },
     formatCurrency(value) {
       const number = parseFloat(value);
       return isNaN(number) ? '0.00' : number.toFixed(2);
@@ -97,40 +109,210 @@ export default {
         hour12: true
       });
     },
+    async changeStatus(){
+      const token = this.$route.params.id;
+      const data = [];
+      this.orders.forEach(item => {
+        data.push({
+          product_id: token,
+          status: this.status,
+          payment_id: item.payment_id,
+          payment_status: this.paymentStatus
+        });
+      });
+
+      if(this.paymentStatus === null || this.status === null){
+        alert('Status is null. Please check!');
+      }else{
+        const response = await fetch("http://localhost/raj-express/backend/controller/admincontroller/orderController/changeStatusOrderController.php", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ data: data})
+        });
+
+        if(response.status == 200){
+          alert('Status Changed!');
+          this.setNotitication();
+        }else{
+          alert('The status is : '+response.status);
+        }
+      }
+    },
     async fetchOrderDetails() {
       const token = this.$route.params.id;
       try {
-        const response = await axios.get('http://localhost/raj-express/backend/controller/adminController/orderController/orderDetailsController.php', {
+        const response = await axios.get('http://localhost/raj-express/backend/controller/admincontroller/orderController/orderDetailsController.php', {
           headers: { 'Authorization': token }
         });
-        Object.assign(this, response.data);
-        this.extra = response.data.extra != 'null' || response.data.extra != '' ? JSON.parse(response.data.extra) : 'No Extra';
+        this.orders = response.data.orders;
+
+        this.printData = response.data.orders.map(order => {
+          return {
+            ...order, 
+            created_at: order.created_at, 
+            total: this.grandTotal + this.total_amount_product + this.totalShippingItems(this.deliveryAddress)
+          };
+        });
+        this.extra = response.data.orders.map(order => {
+          let extras = JSON.parse(order.extra);
+
+          const combinedExtras = extras.reduce((acc, item) => {
+            if (acc[item.name]) {
+              acc[item.name].quantity += item.quantity;
+            } else {
+              acc[item.name] = { ...item };
+            }
+            return acc;
+          }, {});
+
+          return {
+            combinedExtras: Object.values(combinedExtras), 
+          };
+        });
+
+        this.allExtraCombine = this.extra.reduce((acc, order) => {
+          order.combinedExtras.forEach(item => {
+            if (acc[item.name]) {
+              acc[item.name].quantity += item.quantity;
+              acc[item.name].totalPrice += item.price * item.quantity;
+            } else {
+              acc[item.name] = { 
+                name: item.name, 
+                price: item.price, 
+                quantity: item.quantity, 
+                totalPrice: item.price * item.quantity
+              };
+            }
+          });
+          return acc;
+        }, {});
+        this.allExtraCombine = Object.values(this.allExtraCombine);
+        this.grandTotal = this.allExtraCombine.reduce((sum, item) => sum + item.totalPrice, 0);
+
       } catch (error) {
         console.error('Error fetching order details:', error);
       }
     },
     async fetchProduct() {
-      const token = this.$route.params.id;
       try {
-        const response = await axios.get('http://localhost/raj-express/backend/controller/adminController/orderController/orderDetailsProductController.php', {
+        const token = this.$route.params.id;
+        const response = await axios.get('http://localhost/raj-express/backend/controller/admincontroller/orderController/orderDetailsProductController.php', {
           headers: { 'Authorization': token }
         });
+        this.total_amount_product = response.data.orderDetails.reduce((total, product) => {
+          return total + (product.product_price * product.qty);
+        }, 0);
         this.products = response.data.orderDetails;
       } catch (error) {
         console.error('Error fetching product details:', error);
       }
     },
+    async fetchAddress() {
+      try {
+        const token = this.$route.params.id;
+        const response = await axios.get('http://localhost/raj-express/backend/controller/admincontroller/orderController/orderDetailsAddressController.php', {
+          headers: { 'Authorization': token }
+        });
+        this.latitude = response.data.latitude;
+        this.longitude = response.data.longitude;
+        this.deliveryAddress = response.data.deliveryAddress;
+        this.streetNumber = response.data.streetNumber;
+        this.landmark = response.data.landmark;
+        this.mapMark();
+      } catch (error) {
+        console.error('Error fetching product details:', error);
+      }
+    },
     goBack() {
-      this.$router.push({ name: 'orders' });
+      this.$router.back();
+    },
+    printOrder() {
+      this.$router.push({
+        name: 'pos-print-order',
+        params: {
+          orderData: JSON.stringify(this.printData)
+        }
+      });
+    },
+    mapMark() {
+      if (!this.latitude || !this.longitude) {
+        console.error('Invalid latitude or longitude values.');
+        return;
+      }
+
+      if (this.map) {
+        this.map.remove();
+      }
+
+      const basakCoordinates = { lat: this.latitude, lng: this.longitude };
+
+      this.map = L.map("map", {
+        center: basakCoordinates,
+        zoom: 14,
+        minZoom: 14,
+      });
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(this.map);
+
+      L.marker(basakCoordinates).addTo(this.map)
+        .bindPopup('Customer Location')
+        .openPopup();
+    },
+    totalExtraItems(item) {
+      return item.reduce((total, extra) => {
+        const extraPrice = parseFloat(extra.price) * (parseInt(extra.quantity) || 1);
+        return total + extraPrice;
+      }, 0);
+    },
+    totalProductItems(item){
+      return item.reduce((total, product) => {
+        const productPrice = parseFloat(product.product_price) * (parseInt(product.qty) || 1);
+        return total + productPrice;
+      }, 0);
+    },
+    totalShippingItems(deliveryAddress){
+      return deliveryAddress == 'Sudtongan' ? 20 : 60;
     },
 
+    getTheSameData(data, specify){
+      let result = data.map(order => order.specify);
+      return result;
+    }
   },
-  mounted() {
+  created() {
     this.fetchOrderDetails();
     this.fetchProduct();
+    this.fetchAddress();
+    this.mapMark();
+  },
+
+  computed: {
+    customerReference() {
+      return this.orders.length > 0 ? this.orders[0].customer_reference : 'No orders available';
+    },
+    dateCreated() {
+      return this.orders.length > 0 ? this.orders[0].created_at : 'No orders available';
+    },
+    paymentMethods() {
+      return this.orders.length > 0 ? this.orders[0].payment_method : 'No orders available';
+    },
+    totalPayment() {
+      return this.orders.length > 0 ? this.orders[0].totalPayment : 'No orders available';
+    },
+    paymentStatus() {
+      return this.orders.length > 0 ? this.orders[0].payment_status : 'No orders available';
+    },
+    createdAt() {
+      return this.orders.length > 0 ? this.orders[0].created_at : 'No orders available';
+    }
   }
 };
 </script>
+
 
 
 

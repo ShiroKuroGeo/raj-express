@@ -218,7 +218,7 @@ export default {
           product_id: item.id,
           product_name: item.name,
           quantity: item.qty,
-          price: item.price* item.qty,
+          price: item.price * item.qty,
           payment_status: paymentMethod.value,
           status: 'Paid',
           extra: '',
@@ -232,6 +232,8 @@ export default {
         },
         body: JSON.stringify({ orders: orderData })
       });
+
+      console.log(response.data);
 
       alert('Success Order!');
       

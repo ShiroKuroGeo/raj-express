@@ -11,17 +11,21 @@ $authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : 8;
 
 try {
     
-    $query = "SELECT prod.product_id, prod.product_name, prod.product_price, prod.product_image, ord.order_qty as qty FROM `orders` as ord INNER JOIN `products` AS prod ON ord.product_id = prod.product_id WHERE ord.customer_reference = :order_id;";
+    $query = "SELECT addre.latitude, addre.longitude, addre.deliveryAddress, addre.streetNumber, addre.landmark FROM `orders` as ord INNER JOIN `addresses` AS addre ON ord.address_id = addre.address_id WHERE ord.customer_reference = :order_id GROUP BY ord.customer_reference;";
     $stmt = $db->prepare($query);
     $stmt->bindParam(':order_id', $authHeader);
     $stmt->execute();
 
     if ($stmt->rowCount() > 0) {
-        $orderDetails = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $addressDetails = $stmt->fetch(PDO::FETCH_ASSOC);
     
         $set->sendJsonResponse([
             "success" => true,
-            "orderDetails" => $orderDetails,
+            "latitude" => $addressDetails['latitude'],
+            "longitude" => $addressDetails['longitude'],
+            "deliveryAddress" => $addressDetails['deliveryAddress'],
+            "streetNumber" => $addressDetails['streetNumber'],
+            "landmark" => $addressDetails['landmark'],
         ]);
     } else {
         $set->sendJsonResponse(["error" => "Order Details not found"], 404);

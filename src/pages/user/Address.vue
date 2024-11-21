@@ -31,11 +31,18 @@
           <div id="map" style="height: 500px;"></div>
           <q-input v-model="latitude" v-show="hide" label="Latitude" filled class="q-mt-md" />
           <q-input v-model="longitude" v-show="hide" label="Longitude" filled class="q-mt-md" />
-          <q-input outlined v-model="deliveryAddress" label="Delivery Address">
+          <q-select
+            outlined
+            v-model="deliveryAddress"
+            :options="addressOptions"
+            label="Delivery Address"
+            emit-value
+            map-options
+          >
             <template v-slot:prepend>
               <q-icon name="place" />
             </template>
-          </q-input>
+          </q-select>
           <q-input outlined v-model="streetNumber" label="Street Number">
             <template v-slot:prepend>
               <q-icon name="home" />
@@ -74,6 +81,15 @@ export default {
       personName: '',
       phoneNumber: '',
       addressDatas: [],
+      addressOptions: [
+        { label: 'Agus ', value: 'Agus' },
+        { label: 'Bankal ', value: 'Bankal' },
+        { label: 'Marigondon', value: 'Marigondon' },
+        { label: 'Pajac ', value: 'Pajac' },
+        { label: 'Pusok ', value: 'Pusok' },
+        { label: 'Subabasbas', value: 'Subabasbas' },
+        { label: 'Sudtongan', value: 'Sudtongan' },
+      ],
       hide: false,
       map: null, 
       marker: null,

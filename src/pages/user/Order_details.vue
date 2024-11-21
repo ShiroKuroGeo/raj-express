@@ -12,19 +12,19 @@
               <q-item>
                 <q-item-section>
                   <q-item-label caption>Order Number</q-item-label>
-                  <q-item-label class="text-uppercase">{{ cusref || 'N/A' }}</q-item-label>
+                  <q-item-label class="text-uppercase">{{ customerReference || 'N/A' }}</q-item-label>
                 </q-item-section>
               </q-item>
               <q-item>
                 <q-item-section>
                   <q-item-label caption>Date</q-item-label>
-                  <q-item-label>{{ first_order_date ? formatDate(first_order_date) : 'N/A' }}</q-item-label>
+                  <q-item-label>{{ dateCreated ? formatDate(dateCreated) : 'N/A' }}</q-item-label>
                 </q-item-section>
               </q-item>
               <q-item>
                 <q-item-section>
                   <q-item-label caption>Payment Method</q-item-label>
-                  <q-item-label class="text-uppercase">{{ payment_method || 'N/A' }}</q-item-label>
+                  <q-item-label class="text-uppercase">{{ paymentMethods || 'N/A' }}</q-item-label>
                 </q-item-section>
               </q-item>
             </q-list>
@@ -33,14 +33,11 @@
             <q-list>
               <q-item>
                 <q-item-section>
-                  <q-item-label caption>Total Items</q-item-label>
-                  <q-item-label>{{ total_orders || 'N/A' }}</q-item-label>
-                </q-item-section>
-              </q-item>
-              <q-item>
-                <q-item-section>
-                  <q-item-label caption>Order Total</q-item-label>
-                  <q-item-label>{{ total_payment ? formatCurrency(total_payment) : 'N/A' }}</q-item-label>
+                  <q-item-label caption>Total Amount</q-item-label>
+                  <q-item-label>{{ grandTotal + total_amount_product + totalShippingItems(deliveryAddress) }}</q-item-label>
+                  <q-item-label><small>AddsOns: {{ grandTotal }}</small></q-item-label>
+                  <q-item-label><small>Product Amount: {{ total_amount_product }}</small></q-item-label>
+                  <q-item-label><small>Shipping Fee: {{ totalShippingItems(deliveryAddress) }}</small></q-item-label>
                 </q-item-section>
               </q-item>
             </q-list>
@@ -48,7 +45,6 @@
         </div>
       </q-card-section>
 
-      <!-- Products Items Table -->
       <q-card-section>
         <div class="text-h6">Products Items</div>
         <q-table :rows="products" :columns="productsON" row-key="name" flat bordered>
@@ -69,7 +65,7 @@
       <!-- Adds On Items Table -->
       <q-card-section>
         <div class="text-h6">Adds On Items</div>
-        <q-table :rows="extra" :columns="addsOns" row-key="name" flat bordered>
+        <q-table :rows="allExtraCombine" :columns="addsOns" row-key="name" flat bordered>
           <template v-slot:body-cell-price="props">
             <q-td :props="props">
               {{ formatCurrency(props.row.price) }}
@@ -78,13 +74,17 @@
         </q-table>
       </q-card-section>
 
-      <!-- Delivery Address and Map -->
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <q-card flat bordered>
               <q-card-section>
                 <div class="text-h6">Delivery Address</div>
+                <div class="text-h6">
+                  <small> Address: {{ deliveryAddress }} <br></small>
+                  <small> Street: {{ streetNumber }} <br></small>
+                  <small> Landmark: {{ landmark }} <br> </small>
+                </div> <br>
                 <div id="map" style="position: relative; height: 400px; width: 100%;"></div>
               </q-card-section>
             </q-card>
@@ -112,22 +112,33 @@ export default {
       orders: [],
       products: [],
       extra: [],
-      cusref: '',
-      total_orders: '',
-      product_names: '',
-      status: '',
-      first_order_date: '',
-      addressContactPerson: '',
-      addressContactNumber: '',
-      deliveryAddress: '',
-      product_id: '',
-      latitude: 0,
-      longitude: 0,
-      streetNumber: '',
-      landmark: '',
-      payment_method: '',
-      total_payment: '',
-      payment_status: '',
+      allExtraCombine: [],
+      latitude: null,
+      longitude: null,
+      deliveryAddress: null,
+      streetNumber: null,
+      landmark: null,
+      total_payment: null,
+      total_amount_product: null,
+      grandTotal: null,
+      // cusref: '',
+      // total_orders: '',
+      // product_names: '',
+      // status: '',
+      // first_order_date: '',
+      // addressContactPerson: '',
+      // addressContactNumber: '',
+      // deliveryAddress: '',
+      // latitude: 0,
+      // longitude: 0,
+      // streetNumber: '',
+      // landmark: '',
+      // payment_method: '',
+      // payment_status: '',
+      // product_id: null,
+      // address_id: null,
+      // payment_id: null,
+      // user_id: null,
       map: null,
       addsOns: [
         { name: 'name', label: 'Adds On', field: (row) => row.name, align: 'left' },
@@ -138,6 +149,7 @@ export default {
         { name: 'product_image', label: 'Product Image', field: (row) => 'http://localhost/raj-express/backend/uploads/' + row.product_image, align: 'left' },
         { name: 'product_name', label: 'Product Name', field: (row) => row.product_name, align: 'center' },
         { name: 'product_price', label: 'Price', field: (row) => row.product_price, align: 'center' },
+        { name: 'product_quantity', label: 'Quantity', field: (row) => row.qty, align: 'center' },
       ],
     };
   },
@@ -166,26 +178,80 @@ export default {
         const response = await axios.get('http://localhost/raj-express/backend/controller/orderController/orderDetailsController.php', {
           headers: { 'Authorization': token }
         });
-        Object.assign(this, response.data);
-        this.extra = JSON.parse(response.data.extra);
-        this.mapMark();
+        this.orders = response.data.orders;
+
+        this.extra = response.data.orders.map(order => {
+          let extras = JSON.parse(order.extra);
+
+          const combinedExtras = extras.reduce((acc, item) => {
+            if (acc[item.name]) {
+              acc[item.name].quantity += item.quantity;
+            } else {
+              acc[item.name] = { ...item };
+            }
+            return acc;
+          }, {});
+
+          return {
+            combinedExtras: Object.values(combinedExtras), 
+          };
+        });
+
+        this.allExtraCombine = this.extra.reduce((acc, order) => {
+          order.combinedExtras.forEach(item => {
+            if (acc[item.name]) {
+              acc[item.name].quantity += item.quantity;
+              acc[item.name].totalPrice += item.price * item.quantity;
+            } else {
+              acc[item.name] = { 
+                name: item.name, 
+                price: item.price, 
+                quantity: item.quantity, 
+                totalPrice: item.price * item.quantity
+              };
+            }
+          });
+          return acc;
+        }, {});
+        this.allExtraCombine = Object.values(this.allExtraCombine);
+        this.grandTotal = this.allExtraCombine.reduce((sum, item) => sum + item.totalPrice, 0);
+
       } catch (error) {
         console.error('Error fetching order details:', error);
       }
     },
     async fetchProduct() {
-      const token = this.$route.params.id;
       try {
+        const token = this.$route.params.id;
         const response = await axios.get('http://localhost/raj-express/backend/controller/orderController/orderDetailsProductController.php', {
           headers: { 'Authorization': token }
         });
+        this.total_amount_product = response.data.orderDetails.reduce((total, product) => {
+          return total + (product.product_price * product.qty);
+        }, 0);
         this.products = response.data.orderDetails;
       } catch (error) {
         console.error('Error fetching product details:', error);
       }
     },
+    async fetchAddress() {
+      try {
+        const token = this.$route.params.id;
+        const response = await axios.get('http://localhost/raj-express/backend/controller/orderController/orderDetailsAddressController.php', {
+          headers: { 'Authorization': token }
+        });
+        this.latitude = response.data.latitude;
+        this.longitude = response.data.longitude;
+        this.deliveryAddress = response.data.deliveryAddress;
+        this.streetNumber = response.data.streetNumber;
+        this.landmark = response.data.landmark;
+        this.mapMark();
+      } catch (error) {
+        console.error('Error fetching product details:', error);
+      }
+    },
     goBack() {
-      this.$router.push({ name: 'orders' });
+      this.$router.back();
     },
     printOrder() {
       this.$router.push({
@@ -220,13 +286,48 @@ export default {
       L.marker(basakCoordinates).addTo(this.map)
         .bindPopup('Customer Location')
         .openPopup();
-    }
+    },
+    totalExtraItems(item) {
+      return item.reduce((total, extra) => {
+        const extraPrice = parseFloat(extra.price) * (parseInt(extra.quantity) || 1);
+        return total + extraPrice;
+      }, 0);
+    },
+    totalProductItems(item){
+      return item.reduce((total, product) => {
+        const productPrice = parseFloat(product.product_price) * (parseInt(product.qty) || 1);
+        return total + productPrice;
+      }, 0);
+    },
+    totalShippingItems(deliveryAddress){
+      return deliveryAddress == 'Sudtongan' ? 20 : 60;
+    },
 
+    getTheSameData(data, specify){
+      let result = data.map(order => order.specify);
+      return result;
+    }
   },
-  mounted() {
+  created() {
     this.fetchOrderDetails();
     this.fetchProduct();
+    this.fetchAddress();
     this.mapMark();
+  },
+
+  computed: {
+    customerReference() {
+      return this.orders.length > 0 ? this.orders[0].customer_reference : 'No orders available';
+    },
+    dateCreated() {
+      return this.orders.length > 0 ? this.orders[0].created_at : 'No orders available';
+    },
+    paymentMethods() {
+      return this.orders.length > 0 ? this.orders[0].payment_method : 'No orders available';
+    },
+    totalPayment() {
+      return this.orders.length > 0 ? this.orders[0].totalPayment : 'No orders available';
+    }
   }
 };
 </script>

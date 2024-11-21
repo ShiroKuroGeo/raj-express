@@ -36,8 +36,7 @@
 
             <div class="text-h6">₱ {{ parseInt(item.product_price) }}</div>
             <div class="" v-for="ex in item.extra">Adds On - {{ ex.name }} - (P {{ ex.price }}.00)</div>
-            <div class="">Total Amount: {{ parseInt(item.product_price * item.quantity) }}
-            </div>
+            <div class="">Total Amount: {{ parseInt(item.product_price * item.quantity) + totalExtraItems(item)}}</div>
           </q-card-section>
         </q-card-section>
       </q-card>
@@ -57,12 +56,16 @@
           <small>Product Total</small>
           <span class="float-end">₱ {{ totalProduct.toFixed(2) }}</span>
         </div>
+        <div class="between">
+          <small>Shippning Total</small>
+          <span class="float-end">₱ {{ getDeliveryAddress == 'Sudtongan' ? 20 : 60  }}</span>
+        </div>
       </div>
 
       <div class="total-payment q-mt-lg">
         <div class="row justify-between text-subtitle1">
           <span>Total Payment: </span>
-          <span class="text-primary">₱ {{ extrasTotal + totalProduct }}</span>
+          <span class="text-primary">₱ {{ extrasTotal + totalProduct + getDeliveryShippingFee }}</span>
         </div>
       </div>
 
@@ -123,7 +126,9 @@ export default {
           extra: JSON.parse(item.extra)
         }));
 
-        this.extras = data.cartItems.flatMap(item => JSON.parse(item.extra));
+        this.extras =  data.cartItems.map(item => ({
+          extra: JSON.parse(item.extra)
+        }));;
       } catch (error) {
         console.error('Error fetching cart items:', error);
       }
@@ -187,17 +192,21 @@ export default {
             const token = localStorage.getItem('token');
             let orderData = [];
   
+            const totalOrders = this.cartItems.length;
+
+            const shippingFeeTotal = this.getDeliveryAddress === 'Sudtongan' ? 20 : 60;
+
+            const shippingFeePerOrder = (shippingFeeTotal / totalOrders).toFixed(2);
+
             this.cartItems.forEach(item => {
               const productTotal = parseFloat(item.product_price) * parseInt(item.quantity);
-  
-              const addonsTotal = this.extras
-                  .filter(addon => addon.selected)
-                  .reduce((total, addon) => {
-                      return total + (parseFloat(addon.price) * (addon.quantity || 1)); 
-                  }, 0);
-  
-              const paymentTotal = (productTotal + addonsTotal).toFixed(2);
-  
+
+              const addonsTotal = item.extra.reduce((total, addon) => {
+                return total + (parseFloat(addon.price) * (addon.quantity || 1)); 
+              }, 0);
+
+              const paymentTotal = (productTotal + addonsTotal + parseFloat(shippingFeePerOrder)).toFixed(2);
+
               orderData.push({
                 user_id: token,
                 cart_id: item.cart_id,
@@ -211,85 +220,113 @@ export default {
                 payment_status: this.paymentMethod === 'cash' ? 'pending' : 'pending on gcash',
               });
             });
+
+            console.log(orderData);
+
+            // const response = await fetch("http://localhost/raj-express/backend/controller/orderController/add.php", {
+            //   method: "POST",
+            //   headers: {
+            //     "Content-Type": "application/json",
+            //   },
+            //   body: JSON.stringify({ orders: orderData })
+            // });
   
-            const response = await fetch("http://localhost/raj-express/backend/controller/orderController/add.php", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ orders: orderData })
-            });
+            // if (!response.ok) {
+            //   const errorMessage = await response.text();
+            //   throw new Error(`HTTP error! status: ${response.status}, message: ${errorMessage}`);
+            // }
   
-            if (!response.ok) {
-              const errorMessage = await response.text();
-              throw new Error(`HTTP error! status: ${response.status}, message: ${errorMessage}`);
-            }
+            // const result = await response.json();
   
-            const result = await response.json();
-  
-            if (result && result.success) {
-              const home = 1;
-              this.setNotitication(home);
-            } else {
-              throw new Error(result.error || "Failed to add product to cart");
-            }
-          }else if(this.paymentMethod === 'online'){
+            // if (result && result.success) {
+            //   const home = 1;
+            //   this.setNotitication(home);
+            // } else {
+            //   throw new Error(result.error || "Failed to add product to cart");
+            // }
+          }
+          else if(this.paymentMethod === 'online'){
             const token = localStorage.getItem('token');
             let orderData = [];
 
+            const totalOrders = this.cartItems.length;
+
+            const shippingFeeTotal = this.getDeliveryAddress === 'Sudtongan' ? 20 : 60;
+
+            const shippingFeePerOrder = (shippingFeeTotal / totalOrders).toFixed(2);
+
             this.cartItems.forEach(item => {
               const productTotal = parseFloat(item.product_price) * parseInt(item.quantity);
-  
-              const addonsTotal = this.extras
-                  .filter(addon => addon.selected)
-                  .reduce((total, addon) => {
-                      return total + (parseFloat(addon.price) * (addon.quantity || 1)); 
-                  }, 0);
-  
-              const paymentTotal = (productTotal + addonsTotal).toFixed(2);
-              let onlineTotal = (productTotal + addonsTotal) * 100;
 
-              // Now data
-              item.extra.forEach((addon) => {
-                  orderData.push({
-                      user_id: token,
-                      cart_id: item.cart_id,
-                      product_id: item.product_id, // Use the product ID or add-on-specific ID if available
-                      address_id: this.selectedAddress,
-                      order_qty: addon.quantity,
-                      totalExtra: null, // Addons don't have nested extras
-                      extra: null, // Addons are treated as individual items
-                      payment_method: this.paymentMethod,
-                      payment_total: parseInt(paymentTotal),
-                      payment_status: this.paymentMethod === 'cash' ? 'pending' : 'pending on gcash',
-                      onlineTotal: onlineTotal,
-                      productTotal: addon.price * 100, // Add-on total
-                      addonTotal: 0, // No nested add-ons
-                      description: addon.name, // Add-on name or description
-                      name: addon.name,
-                      quantity: addon.quantity,
-                  });
-              });
+              const addonsTotal = item.extra.reduce((total, addon) => {
+                return total + (parseFloat(addon.price) * (addon.quantity || 1)); 
+              }, 0);
 
-              // Add the main product after processing add-ons
-              orderData.push({
+              const paymentTotal = (productTotal + addonsTotal + parseFloat(shippingFeePerOrder)).toFixed(2);
+              const onlineTotal = (productTotal + addonsTotal) * 100;
+              // const onlineTotal = productTotal;
+
+              item.extra.forEach(addon => {
+                orderData.push({
+                  forExtraloop: 1,
                   user_id: token,
                   cart_id: item.cart_id,
                   product_id: item.product_id,
                   address_id: this.selectedAddress,
-                  order_qty: item.quantity,
-                  totalExtra: this.extras.length > 0 ? this.extras : null,
-                  extra: item.extra.length > 0 ? item.extra : null,
+                  order_qty: addon.quantity, 
+                  totalExtra: null,
+                  extra: null,
                   payment_method: this.paymentMethod,
                   payment_total: parseInt(paymentTotal),
                   payment_status: this.paymentMethod === 'cash' ? 'pending' : 'pending on gcash',
                   onlineTotal: onlineTotal,
-                  productTotal: parseInt(item.product_price) * 100,
-                  addonTotal: item.extra.reduce((total, addon) => total + parseInt(addon.price || 0), 0), // Sum add-ons
-                  description: item.extra.length > 0 ? item.extra : 'no extra',
-                  name: item.product_name,
-                  quantity: item.quantity,
+                  productTotal: addon.price * 100,
+                  addonTotal: 0, 
+                  description: addon.name,
+                  name: addon.name,
+                  quantity: addon.quantity,
+                });
               });
+
+              orderData.push({
+                forExtraloop: 0, // Main product loop
+                user_id: token,
+                cart_id: item.cart_id,
+                product_id: item.product_id,
+                address_id: this.selectedAddress,
+                order_qty: item.quantity,
+                totalExtra: item.extra.length > 0 ? item.extra : null, // Pass add-ons if available
+                extra: item.extra.length > 0 ? item.extra : null,
+                payment_method: this.paymentMethod,
+                payment_total: parseInt(paymentTotal), // Total for GCash/database
+                payment_status: this.paymentMethod === 'cash' ? 'pending' : 'pending on gcash',
+                onlineTotal: onlineTotal,
+                productTotal: parseInt(item.product_price) * 100,
+                addonTotal: item.extra.reduce((total, addon) => total + parseInt(addon.price || 0), 0), // Sum of add-ons
+                description: item.extra.length > 0 ? 'Has extras' : 'No extras',
+                name: item.product_name,
+                quantity: item.quantity,
+              });
+
+            });
+            orderData.push({
+              forExtraloop: 1,
+              user_id: token,
+              cart_id: 1,
+              product_id: null,
+              address_id: null,
+              order_qty: 1, 
+              totalExtra: null,
+              extra: null,
+              payment_method: null,
+              payment_total: null,
+              payment_status: null,
+              onlineTotal: null,
+              productTotal: shippingFeeTotal * 100,
+              addonTotal: 0, 
+              description: 'Shipping Fee',
+              name: 'Shipping Fee',
+              quantity: 1,
             });
 
             try {
@@ -319,7 +356,8 @@ export default {
                 console.error("Payment process error:", error);
                 alert("An error occurred during the payment process. Please try again.");
             }
-          }else{
+          }
+          else{
             alert('No payment method selected!');
           }
 
@@ -335,16 +373,14 @@ export default {
     addAddress() {
       this.$router.push('/address');
     },
-  },
-  computed: {
-    totalPrice() {
-      return this.cartItems.reduce((total, item) => {
-        const productTotal = parseInt(item.product_price) * parseInt(item.quantity);
-        
-        return total + productTotal;
-      },0)
+    totalExtraItems(item) {
+      return item.extra.reduce((total, extra) => {
+        const extraPrice = parseFloat(extra.price) * (parseInt(extra.quantity) || 1);
+        return total + extraPrice;
+      }, 0);
     },
-    
+  },
+  computed: {    
     totalProduct(){
       return this.cartItems.reduce((total, item) => {
         const productTotal = parseInt(item.product_price) * parseInt(item.quantity);
@@ -353,13 +389,25 @@ export default {
       },0)
     },
     
-    extrasTotal(){
-      return this.extras.reduce((total, item) => {
-        const extrasTotal = parseInt(item.price) * parseInt(item.quantity);
-        
-        return total + extrasTotal;
-      },0)
+    extrasTotal() {
+      return this.extras.reduce((grandTotal, item) => {
+          const itemTotal = item.extra.reduce((total, extra) => {
+              return total + (parseFloat(extra.price) * parseInt(extra.quantity));
+          }, 0);
+          return grandTotal + itemTotal;
+      }, 0);
     },
+
+    getDeliveryShippingFee() {
+      const selected = this.addresses.find(address => address.address_id === this.selectedAddress);
+      const shippingFee = selected ? selected.deliveryAddress : 'No address selected';
+      return shippingFee == 'Sudtongan' ? 20 : 60; 
+    },
+
+    getDeliveryAddress() {
+      const selected = this.addresses.find(address => address.address_id === this.selectedAddress);
+      return selected ? selected.deliveryAddress : 'No address selected';
+    }
 
   },
   created() {

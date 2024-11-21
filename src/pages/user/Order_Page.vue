@@ -13,13 +13,13 @@
         <q-page v-if="tab === 'ongoing'">
           <div v-if="ongoingOrders.length">
             <q-list bordered>
-              <q-item v-for="order in ongoingOrders" :key="order.id" clickable @click="viewOrderDetails(order.id)">
+              <q-item v-for="order in ongoingOrders" :key="order.id" clickable @click="viewOrderDetails(order.reference)">
                 <q-item-section avatar>
                   <q-icon name="receipt_long" />
                 </q-item-section>
                 <q-item-section>
                   <q-item-label>Order #{{ order.id }}</q-item-label>
-                  <q-item-label caption>Amount: {{ order.payment_total }}</q-item-label>
+                  <q-item-label caption>Amount: {{ order.totalPayment }}</q-item-label>
                   <q-item-label caption>Status: {{ order.payment_status }}</q-item-label>
                 </q-item-section>
               </q-item>
@@ -36,7 +36,7 @@
         <q-page v-if="tab === 'history'">
           <div v-if="historyOrders.length">
             <q-list bordered>
-              <q-item v-for="order in historyOrders" :key="order.id" clickable @click="viewOrderDetails(order.id)">
+              <q-item v-for="order in historyOrders" :key="order.id" clickable @click="viewOrderDetails(order.reference)">
                 <q-item-section avatar>
                   <q-icon name="receipt_long" />
                 </q-item-section>

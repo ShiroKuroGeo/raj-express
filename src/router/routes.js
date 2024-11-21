@@ -89,7 +89,7 @@ const routes = [
     children: [
       { path: 'customers', component: () => import('pages/admin/Customer_List.vue') },
       { path: 'invoices', component: () => import('pages/admin/Customer_Invioce.vue') },
-      { path: 'customer-orders/:id', name: 'customerOrderDetails', component: () => import('pages/admin/Customer_viewOrders.vue') },
+      { path: 'customer-orders/:id', name: 'customerOrderDetails', component: () => import('src/pages/admin/Customer_viewOrders.vue') },
       { path: 'customer-details/:id', name: 'CustomerDetails', component: () => import('pages/admin/Customer_Details.vue') },
     ],
   },

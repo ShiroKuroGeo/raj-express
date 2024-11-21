@@ -234,7 +234,7 @@ export default {
         return sum;
       }, 0);
       return productTotal + addOnsTotal;
-  }
+    }
   }
 }
 </script>

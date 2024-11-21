@@ -36,7 +36,7 @@ cart page
                 </div>
                 <div class="col-8 q-pl-md">
                   <div class="text-h6">{{ item.product_name }}</div>
-                  <div class="text-h5">₱{{ (item.product_price * item.quantity).toFixed(2) }}</div>
+                  <div class="text-h5">₱{{ calculateTotalPrice(item) }}</div>
                   <div class="text-caption text-grey">
                     <q-rating
                       v-model="item.rating"
@@ -50,6 +50,7 @@ cart page
                     <q-btn round flat icon="remove" color="grey" @click.stop="decrementQuantity(item)" />
                     <div class="q-px-md">{{ item.quantity || 1 }}</div>
                     <q-btn round flat icon="add" color="red" @click.stop="incrementQuantity(item)" />
+                    <q-btn round flat icon="close" color="red" @click.stop="removeCarts(item.cart_id)" />
                   </div>
                 </div>
               </div>
@@ -101,6 +102,24 @@ export default {
         console.error('Error fetching cart items:', error);
       }
     },
+    calculateTotalPrice(item) {
+        let totalPrice = parseFloat(item.product_price) * item.quantity; 
+
+        if (item.extra && item.extra !== 'null' && item.extra !== '') {
+            try {
+                const extraItems = JSON.parse(item.extra);
+                extraItems.forEach(extraItem => {
+                    if (extraItem.price && extraItem.quantity) {
+                        totalPrice += parseFloat(extraItem.price) * extraItem.quantity; 
+                    }
+                });
+            } catch (e) {
+                console.error('Error parsing extra items:', e);
+            }
+        }
+
+        return totalPrice.toFixed(2); 
+    },
     purchase(){
       this.$router.push('/place-order');
     },
@@ -149,6 +168,33 @@ export default {
           //   color: 'positive',
           //   message: result.success
           // })
+        } else {
+          throw new Error(result.error || "Failed to add product to cart");
+        }
+      } catch (error) {
+        console.log('Error in ' + error);
+      }
+    },
+    async removeCarts (id){
+      try {
+        const datas = {
+          cart_id: id
+        };
+
+        const response = await fetch("http://localhost/raj-express/backend/controller/cartController/removeCart.php", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(datas)
+        });
+
+        const result = await response.json();
+        console.log(result);
+
+        if (result) {
+          console.log('Removed carts!');
+          this.fetchCartItems();
         } else {
           throw new Error(result.error || "Failed to add product to cart");
         }

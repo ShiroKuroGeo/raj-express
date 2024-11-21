@@ -26,26 +26,20 @@
       <q-card-section>
         <div class="text-subtitle2">Add ons</div>
         <q-list>
-          <q-item v-for="(addon, index) in extras" :key="index">
-            <q-item-section avatar>
-              <q-checkbox v-model="addon.selected" />
-            </q-item-section>
-            <q-item-section>{{ addon.name }}</q-item-section>
-            <q-item-section side>₱ {{ addon.price }}</q-item-section>
-            <q-item-section side>
-              <q-btn-group flat>
-                <q-btn flat round icon="remove" @click="changeQuantity(index, -1)" :disable="!addon.selected || addon.quantity === 0" />
-                <q-btn flat disable>{{ addon.quantity }}</q-btn>
-                <q-btn 
-                  flat 
-                  round 
-                  icon="add" 
-                  @click="changeQuantity(index, 1)" 
-                  :disable="!addon.selected" 
-                />
-              </q-btn-group>
-            </q-item-section>
-          </q-item>
+            <q-item v-for="(addon, key) in addons" :key="addon.id">
+                <q-item-section avatar>
+                    <q-checkbox v-model="addon.selected" />
+                </q-item-section>
+                <q-item-section>{{ addon.ao_name }}</q-item-section>
+                <q-item-section side>₱ {{ addon.ao_price }}</q-item-section>
+                <q-item-section side>
+                    <q-btn-group flat>
+                        <q-btn flat round icon="remove" @click="changeQuantity(key, -1)" :disable="!addon.selected || addon.quantity === 0" />
+                        <q-btn flat disable>{{ addon.quantity }}</q-btn>
+                        <q-btn flat round icon="add" @click="changeQuantity(key, 1)" :disable="!addon.selected" />
+                    </q-btn-group>
+                </q-item-section>
+            </q-item>
         </q-list>
       </q-card-section>
 
@@ -186,11 +180,11 @@ export default {
     },
     async updateCart () {
       try {
-        let selectedAddons = this.extras
+        let selectedAddons = this.addons
           .filter(addon => addon.selected)
           .map(addon => ({
-              name: addon.name,
-              price: parseFloat(addon.price), 
+              name: addon.ao_name,
+              price: parseFloat(addon.ao_price), 
               quantity: addon.quantity
           }));
 
@@ -229,7 +223,7 @@ export default {
       this.$router.back();
     },
     changeQuantity(index, delta) {
-        const addon = this.extras[index];
+        const addon = this.addons[index];
         
         if (addon.selected) {
             addon.quantity = Math.max(0, addon.quantity + delta);
@@ -257,15 +251,15 @@ export default {
   },
   computed: {
     totalPrice() {
-      const productTotal = parseFloat(this.cartItems?.price) * this.quantity;
-      const addOnsTotal = this.extras.reduce((sum, addon) => {
+      const productTotal = parseFloat(this.cartItems?.product_price) * parseFloat(this.cartItems?.quantity);
+      const addOnsTotal = this.addons.reduce((sum, addon) => {
         if (addon.selected) {
           return sum + (parseInt(addon.ao_price) * addon.quantity);
         }
         return sum;
       }, 0);
       return productTotal + addOnsTotal;
-  }
+    }
   }
 }
 </script>

@@ -12,18 +12,19 @@ try {
     $adminId = 1;
     $status = 'walk-in';
     $statusPaymentInCounter = 'over-the-counter';
-
-    $payment = "INSERT INTO `payments`(`user_id`, `payment_method`, `payment_total`, `payment_status`) VALUES (:user_id, :payment_method, :payment_total, :payment_status)";
-    $paymentStmt = $db->prepare($payment);
-    $paymentStmt->bindParam(":user_id", $adminId);
-    $paymentStmt->bindParam(":payment_method", $status);
-    $paymentStmt->bindParam(":payment_total", $data['orders'][0]['price']);
-    $paymentStmt->bindParam(":payment_status", $statusPaymentInCounter);
-    $paymentStmt->execute();
-    $paymentId = $db->lastInsertId();
-    $orderReference = 'cusord24' . $paymentId;
+    $orderReference = 'cusord24' . uniqid();
 
     foreach ($data['orders'] as $order) {
+
+        $payment = "INSERT INTO `payments`(`user_id`, `payment_method`, `payment_total`, `payment_status`) VALUES (:user_id, :payment_method, :payment_total, :payment_status)";
+        $paymentStmt = $db->prepare($payment);
+        $paymentStmt->bindParam(":user_id", $adminId);
+        $paymentStmt->bindParam(":payment_method", $status);
+        $paymentStmt->bindParam(":payment_total", $order['price']);
+        $paymentStmt->bindParam(":payment_status", $statusPaymentInCounter);
+        $paymentStmt->execute();
+        $paymentId = $db->lastInsertId();
+
         $orderSql = "INSERT INTO `orders`(`user_id`, `product_id`, `address_id`, `payment_id`, `customer_reference`, `order_qty`, `extra`, `status`) VALUES (:user_id, :product_id, :address_id, :payment_id, :cusref, :quantity, :extra, :stat)";
         $orderStmt = $db->prepare($orderSql);
         $orderStmt->bindParam(":product_id", $order['product_id']);
